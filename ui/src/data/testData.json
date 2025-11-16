@@ -1,0 +1,298 @@
+{
+  "testName": "TOEFL Practice Test",
+  "setup": {
+    "instructions": [
+      "Welcome to the TOEFL Practice Test",
+      "This test consists of multiple sections: Reading, Listening, Speaking, and Writing",
+      "Each section is divided into modules",
+      "You can navigate between questions within the same module using Previous and Next buttons",
+      "Please ensure your camera and microphone are working properly before starting",
+      "Good luck!"
+    ],
+    "permissions": {
+      "camera": true,
+      "microphone": true
+    }
+  },
+  "modules": [
+    {
+      "id": "module-1-reading",
+      "moduleNumber": 1,
+      "section": "reading",
+      "sectionName": "Reading",
+      "questions": [
+        {
+          "id": "q1",
+          "type": "passage",
+          "bundleId": "bundle-1",
+          "bundleIndex": 0,
+          "passage": {
+            "title": "The Mirror Test",
+            "content": [
+              "Very young children cannot recognize themselves in a mirror; they usually achieve this milestone around 18 months of age. The ability to recognize oneself in the mirror is considered to be a key component of self-awareness and consciousness for humans. But what about animals?",
+              "For many years, scientists have known that members of the great ape family could recognize themselves in mirrors. They measured this by the 'mirror test,' which involved putting a colored mark on an ape's body, and then showing the ape its reflection in a mirror. If the ape tried to remove the mark on its own body, the scientists knew that the ape was recognizing its reflection.",
+              "Apes are close relatives of humans, but in recent years, scientists have discovered that other animals also pass the 'mirror test.' Elephants and dolphins have shown signs of self-recognition. These, like apes, are highly intelligent animals. But in a more recent experiment, a type of fish called the cleaner fish tried to scrape a mark off its body when it saw itself in the mirror. This suggests that even less intelligent animals may possess more self-awareness than previously suspected."
+            ]
+          },
+          "questions": [
+            {
+              "id": "q1-1",
+              "question": "The word 'milestone' in the first sentence is closest in meaning to",
+              "options": [
+                "accomplishment",
+                "distance",
+                "weight",
+                "discovery"
+              ],
+              "correctAnswer": 0
+            },
+            {
+              "id": "q1-2",
+              "question": "According to the passage, what is the mirror test?",
+              "options": [
+                "A test to see if animals can see their reflection",
+                "A test involving a colored mark and a mirror to measure self-recognition",
+                "A test to determine animal intelligence",
+                "A test to see if animals are afraid of mirrors"
+              ],
+              "correctAnswer": 1
+            },
+            {
+              "id": "q1-3",
+              "question": "Which animals are mentioned as passing the mirror test?",
+              "options": [
+                "Only great apes",
+                "Great apes, elephants, and dolphins",
+                "Great apes, elephants, dolphins, and cleaner fish",
+                "Only humans and great apes"
+              ],
+              "correctAnswer": 2
+            },
+            {
+              "id": "q1-4",
+              "question": "What does the passage suggest about the cleaner fish?",
+              "options": [
+                "It is more intelligent than apes",
+                "It may have more self-awareness than previously thought",
+                "It cannot recognize itself in a mirror",
+                "It is closely related to humans"
+              ],
+              "correctAnswer": 1
+            },
+            {
+              "id": "q1-5",
+              "question": "At what age do children typically recognize themselves in a mirror?",
+              "options": [
+                "12 months",
+                "18 months",
+                "24 months",
+                "30 months"
+              ],
+              "correctAnswer": 1
+            }
+          ]
+        },
+        {
+          "id": "q2",
+          "type": "notice",
+          "bundleId": "bundle-2",
+          "bundleIndex": 0,
+          "notice": {
+            "title": "Municipal Charter",
+            "subtitle": "Sign up for paperless billing statements today.",
+            "content": "Safe, convenient, easy. Enroll in paperless billing to receive monthly savings account statements in an electronic PDF document. Access your Municipal Charter account through the mobile app and select account preferences in the upper right-hand corner to enroll."
+          },
+          "questions": [
+            {
+              "id": "q2-1",
+              "question": "What type of business issued the notice?",
+              "options": [
+                "An Internet provider",
+                "A computer company",
+                "A paper company",
+                "A bank"
+              ],
+              "correctAnswer": 3
+            },
+            {
+              "id": "q2-2",
+              "question": "What is the main purpose of this notice?",
+              "options": [
+                "To advertise a new mobile app",
+                "To encourage customers to enroll in paperless billing",
+                "To explain how to access account preferences",
+                "To promote monthly savings accounts"
+              ],
+              "correctAnswer": 1
+            }
+          ]
+        },
+        {
+          "id": "q3",
+          "type": "post",
+          "bundleId": "bundle-3",
+          "bundleIndex": 0,
+          "post": {
+            "owner": "Sofia Baker",
+            "content": "Every Saturday, our local farmer's market is the place to be! Fresh fruits, veggies, homemade goodies, and unique crafts await you. The Thompson family's organic produce is a must-try, known for its quality and cordial service. Their stall is always bustling with customers eager to buy fresh, pesticide-free vegetables from the welcoming staff.\n\nDon't miss the bakery stall—get there early for the best bread and pastries, including gluten-free and vegan options. The smell of freshly baked goods fills the air, and these treats sell out fast!\n\nIn addition to food, the market sells handmade crafts like jewelry, pottery, and textiles. These unique items make perfect gifts and support local artisans. Plus, enjoy live music while you shop. Talented local musicians help create a vibrant atmosphere, and the community spirit makes it a delightful experience for all. See you there!"
+          },
+          "questions": [
+            {
+              "id": "q3-1",
+              "question": "What reason is given for the popularity of the Thompson family's stall?",
+              "options": [
+                "They offer cooking tips and recipes.",
+                "They offer the lowest prices at the market.",
+                "They provide friendly service and excellent products.",
+                "They have a beautiful and well-decorated stall."
+              ],
+              "correctAnswer": 2
+            },
+            {
+              "id": "q3-2",
+              "question": "According to the post, what should visitors do to get the best bakery items?",
+              "options": [
+                "Order in advance",
+                "Arrive early",
+                "Visit on weekdays",
+                "Bring cash only"
+              ],
+              "correctAnswer": 1
+            },
+            {
+              "id": "q3-3",
+              "question": "What does the post mention about the market's atmosphere?",
+              "options": [
+                "It is quiet and peaceful",
+                "It features live music and community spirit",
+                "It is very crowded and noisy",
+                "It is only open in the morning"
+              ],
+              "correctAnswer": 1
+            }
+          ]
+        },
+        {
+          "id": "q4",
+          "type": "email",
+          "bundleId": "bundle-4",
+          "bundleIndex": 0,
+          "email": {
+            "to": "edward56L@dmail.com",
+            "from": "artforeveryone@dmail.com",
+            "date": "10/09/2025",
+            "subject": "Art Workshop Reservation Confirmation",
+            "content": "Dear Ms. Edwards,\n\nThe reservation for the art workshop that you made on September 10th has been confirmed. The workshop will take place on September 20th at 3:00 PM. All necessary arts supplies will be provided, but please bring your own apron or smock.\n\nBest regards,\nLaura Bennett"
+          },
+          "questions": [
+            {
+              "id": "q4-1",
+              "question": "When is the date of the art workshop?",
+              "options": [
+                "September 10th",
+                "September 12th",
+                "September 20th",
+                "September 30th"
+              ],
+              "correctAnswer": 2
+            },
+            {
+              "id": "q4-2",
+              "question": "What should Ms. Edwards bring to the workshop?",
+              "options": [
+                "Art supplies",
+                "An apron or smock",
+                "A confirmation email",
+                "Nothing, everything is provided"
+              ],
+              "correctAnswer": 1
+            },
+            {
+              "id": "q4-3",
+              "question": "When did Ms. Edwards make the reservation?",
+              "options": [
+                "September 10th",
+                "September 12th",
+                "September 20th",
+                "October 9th"
+              ],
+              "correctAnswer": 0
+            }
+          ]
+        },
+        {
+          "id": "q5",
+          "type": "fillin",
+          "bundleId": "bundle-5",
+          "bundleIndex": 0,
+          "paragraph": {
+            "text": "The human brain is a complex organ responsible for controlling all bodily functions and enabling thought, emotion, and memory. It i____ divided in several reg____, each wi____ specific ro____. The cerebrum, i____ largest pa____, is invo____ in higher cogn____ functions su____ as reasoning, planning, and language. The cerebellum coordinates movement and balance, while the brainstem controls vital bodily functions like breathing and heart rate. Together, they enable the brain to perform its various ta____."
+          },
+          "questions": [
+            {
+              "id": "q5-1",
+              "question": "Question 1",
+              "correctAnswer": "is",
+              "missingLetters": 1
+            },
+            {
+              "id": "q5-2",
+              "question": "Question 2",
+              "correctAnswer": "regions",
+              "missingLetters": 4
+            },
+            {
+              "id": "q5-3",
+              "question": "Question 3",
+              "correctAnswer": "with",
+              "missingLetters": 2
+            },
+            {
+              "id": "q5-4",
+              "question": "Question 4",
+              "correctAnswer": "roles",
+              "missingLetters": 3
+            },
+            {
+              "id": "q5-5",
+              "question": "Question 5",
+              "correctAnswer": "its",
+              "missingLetters": 2
+            },
+            {
+              "id": "q5-6",
+              "question": "Question 6",
+              "correctAnswer": "part",
+              "missingLetters": 2
+            },
+            {
+              "id": "q5-7",
+              "question": "Question 7",
+              "correctAnswer": "involved",
+              "missingLetters": 4
+            },
+            {
+              "id": "q5-8",
+              "question": "Question 8",
+              "correctAnswer": "cognitive",
+              "missingLetters": 5
+            },
+            {
+              "id": "q5-9",
+              "question": "Question 9",
+              "correctAnswer": "such",
+              "missingLetters": 2
+            },
+            {
+              "id": "q5-10",
+              "question": "Question 10",
+              "correctAnswer": "tasks",
+              "missingLetters": 3
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+
