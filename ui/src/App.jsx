@@ -61,6 +61,7 @@ function App() {
         <CssBaseline />
         <ModuleView
           module={testData.modules[currentModuleIndex]}
+          assets={testData.assets || {}}
           userAnswers={userAnswers}
           onAnswerChange={updateAnswer}
           onComplete={handleModuleComplete}

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Box, Typography } from '@mui/material'
 import TopNavigation from './TopNavigation'
 import PassageQuestion from './questions/PassageQuestion'
@@ -6,8 +6,10 @@ import NoticeQuestion from './questions/NoticeQuestion'
 import PostQuestion from './questions/PostQuestion'
 import EmailQuestion from './questions/EmailQuestion'
 import FillInQuestion from './questions/FillInQuestion'
+import BestResponseQuestion from './questions/BestResponseQuestion'
+import ListenPassageQuestion from './questions/ListenPassageQuestion'
 
-function ModuleView({ module, userAnswers, onAnswerChange, onComplete }) {
+function ModuleView({ module, assets, userAnswers, onAnswerChange, onComplete }) {
   // Create a list of bundles with their types and question counts
   const bundleList = useMemo(() => {
     return module.questions.map((bundle) => ({
@@ -22,7 +24,7 @@ function ModuleView({ module, userAnswers, onAnswerChange, onComplete }) {
     const questions = []
     let questionNumber = 1
     module.questions.forEach((bundle) => {
-      if (bundle.type === 'passage' || bundle.type === 'notice' || bundle.type === 'post' || bundle.type === 'email') {
+      if (bundle.type === 'passage' || bundle.type === 'notice' || bundle.type === 'post' || bundle.type === 'email' || bundle.type === 'bestresponse' || bundle.type === 'listenpassage') {
         // For each sub-question in the bundle, create a flattened question item
         bundle.questions.forEach((subQuestion) => {
           questions.push({
@@ -42,6 +44,11 @@ function ModuleView({ module, userAnswers, onAnswerChange, onComplete }) {
   }, [module.questions])
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
+
+  // Reset question index when module changes
+  useEffect(() => {
+    setCurrentQuestionIndex(0)
+  }, [module.id])
 
   // Find current bundle index based on current question index
   const getCurrentBundleIndex = useMemo(() => {
@@ -95,12 +102,42 @@ function ModuleView({ module, userAnswers, onAnswerChange, onComplete }) {
   const currentQuestionItem = getFlattenedQuestionIndex !== null ? flattenedQuestions[getFlattenedQuestionIndex] : null
 
   const handlePrevious = () => {
+    // Check if the current bundle allows going back
+    if (currentQuestionItem?.bundle?.allowBack === false) {
+      return
+    }
+    // For fillin bundles, check the bundle's allowBack attribute
+    if (currentBundle?.allowBack === false) {
+      return
+    }
     if (currentQuestionIndex > 0) {
       setCurrentQuestionIndex(currentQuestionIndex - 1)
     }
   }
 
   const handleNext = () => {
+    // Check if current question requires an answer before proceeding
+    if (currentQuestionItem?.question?.required) {
+      const questionId = currentQuestionItem.question.id
+      const hasAnswer = userAnswers[questionId] !== undefined && userAnswers[questionId] !== null
+      if (!hasAnswer) {
+        // Don't proceed if required question is not answered
+        return
+      }
+    }
+    
+    // For fillin bundles, check if all required questions are answered
+    if (currentBundle?.type === 'fillin' && currentBundle.questions) {
+      const requiredQuestions = currentBundle.questions.filter(q => q.required === true)
+      const allRequiredAnswered = requiredQuestions.every(q => {
+        return userAnswers[q.id] !== undefined && userAnswers[q.id] !== null
+      })
+      if (requiredQuestions.length > 0 && !allRequiredAnswered) {
+        // Don't proceed if required questions are not answered
+        return
+      }
+    }
+
     // Calculate total navigation items
     const totalItems = bundleList.reduce((sum, bundle) => {
       if (bundle.type === 'fillin') {
@@ -111,6 +148,9 @@ function ModuleView({ module, userAnswers, onAnswerChange, onComplete }) {
 
     if (currentQuestionIndex < totalItems - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1)
+    } else {
+      // On the last question, complete the module and move to next
+      onComplete()
     }
   }
 
@@ -125,18 +165,41 @@ function ModuleView({ module, userAnswers, onAnswerChange, onComplete }) {
 
   // Calculate navigation state
   const canGoPrevious = useMemo(() => {
+    // Check if the current bundle allows going back
+    if (currentQuestionItem?.bundle?.allowBack === false) {
+      return false
+    }
+    // For fillin bundles, check the bundle's allowBack attribute
+    if (currentBundle?.allowBack === false) {
+      return false
+    }
     return currentQuestionIndex > 0
-  }, [currentQuestionIndex])
+  }, [currentQuestionIndex, currentQuestionItem, currentBundle])
 
   const canGoNext = useMemo(() => {
-    const totalQuestions = bundleList.reduce((sum, bundle) => {
-      if (bundle.type === 'fillin') {
-        return sum + 1
+    // Check if current question requires an answer
+    if (currentQuestionItem?.question?.required) {
+      const questionId = currentQuestionItem.question.id
+      const hasAnswer = userAnswers[questionId] !== undefined && userAnswers[questionId] !== null
+      if (!hasAnswer) {
+        return false
       }
-      return sum + bundle.questionCount
-    }, 0)
-    return currentQuestionIndex < totalQuestions - 1
-  }, [currentQuestionIndex, bundleList])
+    }
+    
+    // For fillin bundles, check if all required questions are answered
+    if (currentBundle?.type === 'fillin' && currentBundle.questions) {
+      const requiredQuestions = currentBundle.questions.filter(q => q.required === true)
+      const allRequiredAnswered = requiredQuestions.every(q => {
+        return userAnswers[q.id] !== undefined && userAnswers[q.id] !== null
+      })
+      if (requiredQuestions.length > 0 && !allRequiredAnswered) {
+        return false
+      }
+    }
+    
+    // Always enable Next button - on last question it will complete the module
+    return true
+  }, [currentQuestionIndex, bundleList, currentQuestionItem, currentBundle, userAnswers])
 
   // Calculate question range for display
   const getQuestionRange = () => {
@@ -251,6 +314,44 @@ function ModuleView({ module, userAnswers, onAnswerChange, onComplete }) {
                 question={currentQuestionItem.question}
                 userAnswers={userAnswers}
                 onAnswerChange={handleAnswerChange}
+              />
+            )}
+            {currentQuestionItem.bundleType === 'bestresponse' && (
+              <BestResponseQuestion
+                bundle={currentQuestionItem.bundle}
+                question={currentQuestionItem.question}
+                assets={assets}
+                userAnswers={userAnswers}
+                onAnswerChange={handleAnswerChange}
+              />
+            )}
+            {currentQuestionItem.bundleType === 'listenpassage' && (
+              <ListenPassageQuestion
+                bundle={currentQuestionItem.bundle}
+                question={currentQuestionItem.question}
+                assets={assets}
+                userAnswers={userAnswers}
+                onAnswerChange={handleAnswerChange}
+                onNavigateToFirstQuestion={() => {
+                  // Find the currentQuestionIndex for the first question in this bundle
+                  // We need to count all navigation positions before this bundle
+                  let navigationIndex = 0
+                  for (let i = 0; i < bundleList.length; i++) {
+                    const bundle = bundleList[i]
+                    if (bundle.bundle.id === currentQuestionItem.bundle.id) {
+                      // Found the bundle - the first question is at this navigationIndex
+                      setCurrentQuestionIndex(navigationIndex)
+                      return
+                    }
+                    if (bundle.type === 'fillin') {
+                      // Fillin bundles take 1 position
+                      navigationIndex++
+                    } else {
+                      // Other bundles take questionCount positions
+                      navigationIndex += bundle.questionCount
+                    }
+                  }
+                }}
               />
             )}
           </>

@@ -1,5 +1,10 @@
 {
   "testName": "TOEFL Practice Test",
+  "assets": {
+    "female-character-image": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=600&fit=crop&crop=face",
+    "male-character-image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=600&fit=crop&crop=face",
+    "plumber-character-image": "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=400&h=600&fit=crop"
+  },
   "setup": {
     "instructions": [
       "Welcome to the TOEFL Practice Test",
@@ -288,6 +293,119 @@
               "question": "Question 10",
               "correctAnswer": "tasks",
               "missingLetters": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "module-1-listening",
+      "moduleNumber": 1,
+      "section": "listening",
+      "sectionName": "Listening",
+      "questions": [
+        {
+          "id": "l1",
+          "type": "bestresponse",
+          "bundleId": "bundle-l1",
+          "bundleIndex": 0,
+          "allowBack": false,
+          "questions": [
+            {
+              "id": "l1-1",
+              "character": "female",
+              "characterImageID": "female-character-image",
+              "audioUrl": "https://cdn.pixabay.com/download/audio/2022/03/15/audio_1c15910a47.mp3?filename=this-doesnt-smell-87209.mp3",
+              "options": [
+                "As a matter of fact, I was returning a book.",
+                "Yes, you can find it in the reference section.",
+                "I don't think I'll have enough time to do that.",
+                "Actually, I think I can get there a little earlier."
+              ],
+              "correctAnswer": 3,
+              "required": true
+            }
+          ]
+        },
+        {
+          "id": "l2",
+          "type": "bestresponse",
+          "bundleId": "bundle-l2",
+          "bundleIndex": 1,
+          "allowBack": false,
+          "questions": [
+            {
+              "id": "l2-1",
+              "character": "male",
+              "characterImageID": "male-character-image",
+              "audioUrl": "https://cdn.pixabay.com/download/audio/2022/03/15/audio_1c15910a47.mp3?filename=this-doesnt-smell-87209.mp3",
+              "options": [
+                "I'm sorry, but I haven't seen it anywhere.",
+                "Sure, I'd be happy to help you with that.",
+                "No, I don't think that's a good idea.",
+                "Yes, I remember seeing it yesterday."
+              ],
+              "correctAnswer": 1,
+              "required": true
+            }
+          ]
+        },
+        {
+          "id": "l3",
+          "type": "bestresponse",
+          "bundleId": "bundle-l3",
+          "bundleIndex": 2,
+          "allowBack": false,
+          "questions": [
+            {
+              "id": "l3-1",
+              "character": "plumber",
+              "characterImageID": "plumber-character-image",
+              "audioUrl": "https://cdn.pixabay.com/download/audio/2022/03/15/audio_1c15910a47.mp3?filename=this-doesnt-smell-87209.mp3",
+              "options": [
+                "The problem should be fixed by tomorrow.",
+                "I'll need to check the pipes first.",
+                "That's not something I can help with.",
+                "You should call someone else for that."
+              ],
+              "correctAnswer": 1,
+              "required": true
+            }
+          ]
+        },
+        {
+          "id": "l4",
+          "type": "listenpassage",
+          "bundleId": "bundle-l4",
+          "bundleIndex": 3,
+          "allowBack": false,
+          "heading": "Listen to a talk on a podcast about psychology.",
+          "audioUrl": "https://cdn.pixabay.com/download/audio/2022/03/15/audio_1c15910a47.mp3?filename=this-doesnt-smell-87209.mp3",
+          "characterImageID": "female-character-image",
+          "questions": [
+            {
+              "id": "l4-1",
+              "question": "What does the speaker mention as a way that people can reduce their ecological footprint?",
+              "options": [
+                "By disposing of waste appropriately",
+                "By joining an environmental organization",
+                "By using environmentally friendly forms of transportation",
+                "By eating locally produced food"
+              ],
+              "correctAnswer": 2,
+              "required": true
+            },
+            {
+              "id": "l4-2",
+              "question": "According to the speaker, what is one benefit of sustainable living?",
+              "options": [
+                "It reduces personal expenses",
+                "It improves mental health",
+                "It strengthens community bonds",
+                "It increases productivity"
+              ],
+              "correctAnswer": 1,
+              "required": true
             }
           ]
         }
