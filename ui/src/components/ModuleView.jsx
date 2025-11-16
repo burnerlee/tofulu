@@ -1,10 +1,15 @@
 import { useState, useMemo, useEffect } from 'react'
-import { Box, Typography } from '@mui/material'
+import { Box, Typography, Button } from '@mui/material'
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
+import VisibilityIcon from '@mui/icons-material/Visibility'
 import TopNavigation from './TopNavigation'
 import PassageQuestion from './questions/PassageQuestion'
 import NoticeQuestion from './questions/NoticeQuestion'
 import PostQuestion from './questions/PostQuestion'
 import EmailQuestion from './questions/EmailQuestion'
+import EmailWriting from './questions/EmailWriting'
+import GroupDiscussionWriting from './questions/GroupDiscussionWriting'
+import BuildTheSentence from './questions/BuildTheSentence'
 import FillInQuestion from './questions/FillInQuestion'
 import BestResponseQuestion from './questions/BestResponseQuestion'
 import ListenPassageQuestion from './questions/ListenPassageQuestion'
@@ -24,7 +29,7 @@ function ModuleView({ module, assets, userAnswers, onAnswerChange, onComplete })
     const questions = []
     let questionNumber = 1
     module.questions.forEach((bundle) => {
-      if (bundle.type === 'passage' || bundle.type === 'notice' || bundle.type === 'post' || bundle.type === 'email' || bundle.type === 'bestresponse' || bundle.type === 'listenpassage') {
+      if (bundle.type === 'passage' || bundle.type === 'notice' || bundle.type === 'post' || bundle.type === 'email' || bundle.type === 'emailwriting' || bundle.type === 'groupdiscussionwriting' || bundle.type === 'buildthesentence' || bundle.type === 'bestresponse' || bundle.type === 'listenpassage') {
         // For each sub-question in the bundle, create a flattened question item
         bundle.questions.forEach((subQuestion) => {
           questions.push({
@@ -44,10 +49,14 @@ function ModuleView({ module, assets, userAnswers, onAnswerChange, onComplete })
   }, [module.questions])
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
+  const [showTimer, setShowTimer] = useState(true)
+  // Store timer states per question ID
+  const [questionTimers, setQuestionTimers] = useState({}) // { questionId: { timeRemaining: number, isExpired: boolean } }
 
-  // Reset question index when module changes
+  // Reset question index and timers when module changes
   useEffect(() => {
     setCurrentQuestionIndex(0)
+    setQuestionTimers({}) // Reset all timers when module changes
   }, [module.id])
 
   // Find current bundle index based on current question index
@@ -101,6 +110,80 @@ function ModuleView({ module, assets, userAnswers, onAnswerChange, onComplete })
   
   const currentQuestionItem = getFlattenedQuestionIndex !== null ? flattenedQuestions[getFlattenedQuestionIndex] : null
 
+  // Timer countdown - only for emailwriting and groupdiscussionwriting questions
+  const isEmailWriting = currentQuestionItem?.bundleType === 'emailwriting'
+  const isGroupDiscussionWriting = currentQuestionItem?.bundleType === 'groupdiscussionwriting'
+  const hasTimer = isEmailWriting || isGroupDiscussionWriting
+  
+  // Get timer duration from bundle/question (default 10 seconds)
+  const timerDuration = currentQuestionItem?.bundle?.timerDuration || currentQuestionItem?.question?.timerDuration || 10
+  const currentQuestionId = currentQuestionItem?.question?.id
+
+  // Initialize timer for current question if it doesn't exist
+  useEffect(() => {
+    if (hasTimer && currentQuestionId) {
+      setQuestionTimers((prev) => {
+        // Only initialize if timer doesn't exist for this question
+        if (!prev[currentQuestionId]) {
+          return {
+            ...prev,
+            [currentQuestionId]: {
+              timeRemaining: timerDuration,
+              isExpired: false,
+            },
+          }
+        }
+        return prev
+      })
+    }
+  }, [hasTimer, currentQuestionId, timerDuration])
+
+  // Get current question's timer state
+  const currentTimer = currentQuestionId ? questionTimers[currentQuestionId] : null
+  const timeRemaining = currentTimer?.timeRemaining ?? 0
+  const isTimerExpired = currentTimer?.isExpired ?? false
+
+  // Run all active timers
+  useEffect(() => {
+    const activeTimerCount = Object.values(questionTimers).filter(
+      (timer) => timer && !timer.isExpired && timer.timeRemaining > 0
+    ).length
+
+    if (activeTimerCount === 0) {
+      return
+    }
+
+    const interval = setInterval(() => {
+      setQuestionTimers((prev) => {
+        const updated = { ...prev }
+        let hasChanges = false
+
+        Object.keys(prev).forEach((questionId) => {
+          const timer = prev[questionId]
+          if (timer && !timer.isExpired && timer.timeRemaining > 0) {
+            const newTimeRemaining = timer.timeRemaining - 1
+            updated[questionId] = {
+              timeRemaining: newTimeRemaining,
+              isExpired: newTimeRemaining <= 0,
+            }
+            hasChanges = true
+          }
+        })
+
+        return hasChanges ? updated : prev
+      })
+    }, 1000)
+
+    return () => clearInterval(interval)
+  }, [questionTimers])
+
+  const formatTime = (totalSeconds) => {
+    const hours = Math.floor(totalSeconds / 3600)
+    const mins = Math.floor((totalSeconds % 3600) / 60)
+    const secs = totalSeconds % 60
+    return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
+  }
+
   const handlePrevious = () => {
     // Check if the current bundle allows going back
     if (currentQuestionItem?.bundle?.allowBack === false) {
@@ -122,6 +205,22 @@ function ModuleView({ module, assets, userAnswers, onAnswerChange, onComplete })
       const hasAnswer = userAnswers[questionId] !== undefined && userAnswers[questionId] !== null
       if (!hasAnswer) {
         // Don't proceed if required question is not answered
+        return
+      }
+    }
+    
+    // For BuildTheSentence questions, check if all blanks are filled
+    if (currentQuestionItem?.bundleType === 'buildthesentence') {
+      const questionId = currentQuestionItem.question.id
+      const answer = userAnswers[questionId]
+      if (!answer || !Array.isArray(answer)) {
+        // No answer or invalid answer format
+        return
+      }
+      // Check if all blanks are filled (no null values)
+      const allBlanksFilled = answer.every(phraseIndex => phraseIndex !== null && phraseIndex !== undefined)
+      if (!allBlanksFilled) {
+        // Don't proceed if not all blanks are filled
         return
       }
     }
@@ -182,6 +281,22 @@ function ModuleView({ module, assets, userAnswers, onAnswerChange, onComplete })
       const questionId = currentQuestionItem.question.id
       const hasAnswer = userAnswers[questionId] !== undefined && userAnswers[questionId] !== null
       if (!hasAnswer) {
+        return false
+      }
+    }
+    
+    // For BuildTheSentence questions, check if all blanks are filled
+    if (currentQuestionItem?.bundleType === 'buildthesentence') {
+      const questionId = currentQuestionItem.question.id
+      const answer = userAnswers[questionId]
+      if (!answer || !Array.isArray(answer)) {
+        // No answer or invalid answer format
+        return false
+      }
+      // Check if all blanks are filled (no null values)
+      const allBlanksFilled = answer.every(phraseIndex => phraseIndex !== null && phraseIndex !== undefined)
+      if (!allBlanksFilled) {
+        // Disable Next button if not all blanks are filled
         return false
       }
     }
@@ -251,6 +366,9 @@ function ModuleView({ module, assets, userAnswers, onAnswerChange, onComplete })
           backgroundColor: 'white',
           padding: '4px 24px',
           borderBottom: '1px solid #e0e0e0',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
         }}
       >
         <Typography
@@ -263,6 +381,56 @@ function ModuleView({ module, assets, userAnswers, onAnswerChange, onComplete })
         >
           {module.sectionName} | {getQuestionRange()}
         </Typography>
+        
+        {/* Timer - only show for questions with timer */}
+        {hasTimer && showTimer && (
+          <Box sx={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <Typography
+              sx={{
+                fontSize: '16px',
+                fontWeight: 400,
+                color: '#424242',
+                fontFamily: 'inherit',
+              }}
+            >
+              {formatTime(timeRemaining)}
+            </Typography>
+            <Button
+              onClick={() => setShowTimer(false)}
+              sx={{
+                color: '#008080',
+                textTransform: 'none',
+                minWidth: 'auto',
+                padding: '4px 8px',
+                fontSize: '14px',
+                '&:hover': {
+                  backgroundColor: 'rgba(0, 128, 128, 0.04)',
+                },
+              }}
+              startIcon={<VisibilityOffIcon sx={{ fontSize: '18px', color: '#008080' }} />}
+            >
+              Hide Time
+            </Button>
+          </Box>
+        )}
+        {hasTimer && !showTimer && (
+          <Button
+            onClick={() => setShowTimer(true)}
+            sx={{
+              color: '#008080',
+              textTransform: 'none',
+              minWidth: 'auto',
+              padding: '4px 8px',
+              fontSize: '14px',
+              '&:hover': {
+                backgroundColor: 'rgba(0, 128, 128, 0.04)',
+              },
+            }}
+            startIcon={<VisibilityIcon sx={{ fontSize: '18px', color: '#008080' }} />}
+          >
+            Show Time
+          </Button>
+        )}
       </Box>
 
       {/* Main Content */}
@@ -271,6 +439,10 @@ function ModuleView({ module, assets, userAnswers, onAnswerChange, onComplete })
           maxWidth: '1400px',
           margin: '0 auto',
           padding: '24px',
+          height: 'calc(100vh - 120px)',
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
         }}
       >
         {currentBundle?.type === 'fillin' && (
@@ -316,6 +488,34 @@ function ModuleView({ module, assets, userAnswers, onAnswerChange, onComplete })
                 onAnswerChange={handleAnswerChange}
               />
             )}
+            {currentQuestionItem.bundleType === 'emailwriting' && (
+              <EmailWriting
+                bundle={currentQuestionItem.bundle}
+                question={currentQuestionItem.question}
+                userAnswers={userAnswers}
+                onAnswerChange={handleAnswerChange}
+                isTimerExpired={isTimerExpired}
+              />
+            )}
+            {currentQuestionItem.bundleType === 'groupdiscussionwriting' && (
+              <GroupDiscussionWriting
+                bundle={currentQuestionItem.bundle}
+                question={currentQuestionItem.question}
+                userAnswers={userAnswers}
+                onAnswerChange={handleAnswerChange}
+                isTimerExpired={isTimerExpired}
+                assets={assets}
+              />
+            )}
+            {currentQuestionItem.bundleType === 'buildthesentence' && (
+              <BuildTheSentence
+                bundle={currentQuestionItem.bundle}
+                question={currentQuestionItem.question}
+                userAnswers={userAnswers}
+                onAnswerChange={handleAnswerChange}
+                assets={assets}
+              />
+            )}
             {currentQuestionItem.bundleType === 'bestresponse' && (
               <BestResponseQuestion
                 bundle={currentQuestionItem.bundle}
@@ -356,6 +556,20 @@ function ModuleView({ module, assets, userAnswers, onAnswerChange, onComplete })
             )}
           </>
         )}
+      </Box>
+
+      {/* Bottom Bar */}
+      <Box
+        sx={{
+          position: 'fixed',
+          bottom: 0,
+          right: 0,
+          padding: '8px 16px',
+          backgroundColor: '#f5f5f5',
+          borderTop: '1px solid #e0e0e0',
+          borderLeft: '1px solid #e0e0e0',
+        }}
+      >
       </Box>
     </Box>
   )

@@ -21,6 +21,78 @@
   },
   "modules": [
     {
+      "id": "module-1-writing",
+      "moduleNumber": 1,
+      "section": "writing",
+      "sectionName": "Writing",
+      "questions": [
+        {
+          "id": "w1",
+          "type": "emailwriting",
+          "bundleId": "bundle-w1",
+          "bundleIndex": 0,
+          "content": "<p>A new poetry magazine has asked its readers for submissions, and you decided to submit two of your poems. However, you had a problem using the online submission form, and you are not certain that your submissions were received.</p><p>Write an email to the editor of the magazine. In your email, do the following.</p><ul><li>Tell the editor what you like about the new magazine.</li><li>Describe the problem you experienced.</li><li>Ask about the status of your submissions.</li></ul><p>Write as much as you can and in complete sentences.</p>",
+          "to": "editor@sunshinepoetrymagazine.com",
+          "subject": "Problem using submission form",
+          "questions": [
+            {
+              "id": "w1-1",
+              "question": "Write your email response"
+            }
+          ]
+        },
+        {
+          "id": "w2",
+          "type": "groupdiscussionwriting",
+          "bundleId": "bundle-w2",
+          "bundleIndex": 1,
+          "timerDuration": 10,
+          "content": "<p>Your professor is teaching a class on social studies. Write a post responding to the professor's question.</p><p>In your response, you should do the following.</p><ul><li>Express and support your opinion.</li><li>Make a contribution to the discussion in your own words.</li></ul><p>An effective response will contain at least 100 words.</p>",
+          "professorImageID": "male-character-image",
+          "questionText": "Volunteerism refers to the act of offering your time and service without financial compensation to benefit a community, organization, or cause. While many people volunteer mainly to help others, some institutions have mandatory volunteer programs. High schools are one example, where students may be required to complete a certain number of volunteer hours to graduate. What do you think? Should high school students be required to do volunteer work? Why or why not?",
+          "comments": [
+            {
+              "characterImageID": "female-character-image",
+              "content": "Yes, I think high schools should require volunteer hours because it helps students build a sense of civic responsibility. Many teenagers don't naturally think about helping others, and this requirement can introduce them to the idea that their time and effort can make a real difference in the lives of others."
+            },
+            {
+              "characterImageID": "plumber-character-image",
+              "content": "I don't think volunteer hours should be required because many students already have limited free time. Some have part-time jobs or take care of younger siblings after school. Adding a mandatory volunteer requirement could create extra stress and make it harder for those students to balance their existing responsibilities."
+            }
+          ],
+          "questions": [
+            {
+              "id": "w2-1",
+              "question": "Write your response to the discussion"
+            }
+          ]
+        },
+        {
+          "id": "w3",
+          "type": "buildthesentence",
+          "bundleId": "bundle-w3",
+          "bundleIndex": 2,
+          "characterOneImageID": "male-character-image",
+          "characterTwoImageID": "female-character-image",
+          "sentence1": "How did you prepare for the exam?",
+          "sentence2": "I used ______ ______ ______ ______ ______.",
+          "jumbledPhrases": [
+            "the study guide",
+            "that",
+            "was provided",
+            "by",
+            "the professor"
+          ],
+          "questions": [
+            {
+              "id": "w3-1",
+              "question": "Build the sentence"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "id": "module-1-reading",
       "moduleNumber": 1,
       "section": "reading",
