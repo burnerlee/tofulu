@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
+import { VolumeProvider } from './contexts/VolumeContext'
+import WelcomePage from './components/WelcomePage'
+import HardwareCheck from './components/HardwareCheck'
+import VolumeAdjustment from './components/VolumeAdjustment'
+import MicrophoneAdjustment from './components/MicrophoneAdjustment'
 import SetupPage from './components/SetupPage'
 import ModuleView from './components/ModuleView'
 import testData from './data/testData.json'
@@ -18,11 +23,23 @@ const theme = createTheme({
 })
 
 function App() {
-  const [currentView, setCurrentView] = useState('setup')
+  const [currentView, setCurrentView] = useState('welcome')
   const [currentModuleIndex, setCurrentModuleIndex] = useState(0)
   const [userAnswers, setUserAnswers] = useState({})
 
-  const handleSetupComplete = () => {
+  const handleWelcomeContinue = () => {
+    setCurrentView('hardware-check')
+  }
+
+  const handleHardwareCheckComplete = () => {
+    setCurrentView('volume-adjustment')
+  }
+
+  const handleVolumeAdjustmentComplete = () => {
+    setCurrentView('microphone-adjustment')
+  }
+
+  const handleMicrophoneAdjustmentComplete = () => {
     setCurrentView('module')
     setCurrentModuleIndex(0)
   }
@@ -43,42 +60,45 @@ function App() {
     }))
   }
 
-  if (currentView === 'setup') {
-    return (
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <SetupPage 
-          instructions={testData.setup.instructions}
-          onComplete={handleSetupComplete}
-        />
-      </ThemeProvider>
-    )
-  }
-
-  if (currentView === 'module' && testData.modules[currentModuleIndex]) {
-    return (
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <ModuleView
-          module={testData.modules[currentModuleIndex]}
-          assets={testData.assets || {}}
-          userAnswers={userAnswers}
-          onAnswerChange={updateAnswer}
-          onComplete={handleModuleComplete}
-        />
-      </ThemeProvider>
-    )
-  }
-
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Test Complete!</h1>
-          <p>Thank you for completing the test.</p>
-        </div>
-      </div>
+      <VolumeProvider>
+        {currentView === 'welcome' && (
+          <WelcomePage onContinue={handleWelcomeContinue} />
+        )}
+
+        {currentView === 'hardware-check' && (
+          <HardwareCheck onContinue={handleHardwareCheckComplete} />
+        )}
+
+        {currentView === 'volume-adjustment' && (
+          <VolumeAdjustment onContinue={handleVolumeAdjustmentComplete} />
+        )}
+
+        {currentView === 'microphone-adjustment' && (
+          <MicrophoneAdjustment onContinue={handleMicrophoneAdjustmentComplete} />
+        )}
+
+        {currentView === 'module' && testData.modules[currentModuleIndex] && (
+          <ModuleView
+            module={testData.modules[currentModuleIndex]}
+            assets={testData.assets || {}}
+            userAnswers={userAnswers}
+            onAnswerChange={updateAnswer}
+            onComplete={handleModuleComplete}
+          />
+        )}
+
+        {currentView === 'complete' && (
+          <div className="flex items-center justify-center min-h-screen">
+            <div className="text-center">
+              <h1 className="text-2xl font-bold mb-4">Test Complete!</h1>
+              <p>Thank you for completing the test.</p>
+            </div>
+          </div>
+        )}
+      </VolumeProvider>
     </ThemeProvider>
   )
 }

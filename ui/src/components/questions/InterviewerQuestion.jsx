@@ -2,8 +2,10 @@ import { useState, useEffect, useRef } from 'react'
 import { Box, Typography, Modal } from '@mui/material'
 import MicIcon from '@mui/icons-material/Mic'
 import MicOffIcon from '@mui/icons-material/MicOff'
+import { useVolume } from '../../contexts/VolumeContext'
 
 function InterviewerQuestion({ bundle, assets, onNextChild, isParent, currentChildIndex }) {
+  const { getVolumeDecimal } = useVolume()
   // State management
   const [isPlaying, setIsPlaying] = useState(false)
   const [isRecording, setIsRecording] = useState(false)
@@ -80,6 +82,7 @@ function InterviewerQuestion({ bundle, assets, onNextChild, isParent, currentChi
     }
     
     const audio = new Audio(audioUrl)
+    audio.volume = getVolumeDecimal() // Apply volume setting
     audioRef.current = audio
     
     const handleEnded = () => {
@@ -125,6 +128,7 @@ function InterviewerQuestion({ bundle, assets, onNextChild, isParent, currentChi
           deepSoundRef.current.currentTime = 0
         }
         const beepAudio = new Audio(beepSoundUrl)
+        beepAudio.volume = getVolumeDecimal() // Apply volume setting
         deepSoundRef.current = beepAudio
         beepAudio.play().catch((error) => {
           console.error('Error playing beep sound:', error)

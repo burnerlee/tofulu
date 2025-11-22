@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'react'
 import { Box, Typography, Radio, RadioGroup, FormControlLabel, FormControl, Button } from '@mui/material'
 import RefreshIcon from '@mui/icons-material/Refresh'
+import { useVolume } from '../../contexts/VolumeContext'
 
 function ListenPassageQuestion({ bundle, question, assets, userAnswers, onAnswerChange, onNavigateToFirstQuestion }) {
+  const { getVolumeDecimal } = useVolume()
   // Check if this is the first question in the bundle
   const isFirstQuestion = bundle.questions && bundle.questions[0]?.id === question.id
   const [showIntro, setShowIntro] = useState(() => bundle.questions && bundle.questions[0]?.id === question.id)
@@ -46,6 +48,7 @@ function ListenPassageQuestion({ bundle, question, assets, userAnswers, onAnswer
     const audioUrl = bundle.audioUrl || 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_1c15910a47.mp3?filename=this-doesnt-smell-87209.mp3'
     console.log('[ListenPassageQuestion] Creating audio element', { audioUrl })
     const audio = new Audio(audioUrl)
+    audio.volume = getVolumeDecimal() // Apply volume setting
     audioRef.current = audio
 
     // Handle audio end

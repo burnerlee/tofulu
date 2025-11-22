@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'react'
 import { Box, Typography, Radio, RadioGroup, FormControlLabel, FormControl, Button } from '@mui/material'
 import RefreshIcon from '@mui/icons-material/Refresh'
+import { useVolume } from '../../contexts/VolumeContext'
 
 function BestResponseQuestion({ bundle, question, assets, userAnswers, onAnswerChange }) {
+  const { getVolumeDecimal } = useVolume()
   const [optionsEnabled, setOptionsEnabled] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
   const audioRef = useRef(null)
@@ -38,6 +40,7 @@ function BestResponseQuestion({ bundle, question, assets, userAnswers, onAnswerC
     
     // Create audio element
     const audio = new Audio(question.audioUrl || 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_1c15910a47.mp3?filename=this-doesnt-smell-87209.mp3')
+    audio.volume = getVolumeDecimal() // Apply volume setting
     audioRef.current = audio
 
     // Handle audio end
