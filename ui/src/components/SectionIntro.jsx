@@ -1,5 +1,8 @@
-import { useMemo } from 'react'
+import { useMemo, useEffect, useRef } from 'react'
 import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Divider } from '@mui/material'
+import { useVolume } from '../contexts/VolumeContext'
+import listeningIntroAudio from '../audios/listeningIntro.mp3'
+import speakingIntroAudio from '../audios/speakingIntro.mp3'
 
 // Map question types to display names and descriptions by section
 const taskTypeMap = {
@@ -77,9 +80,72 @@ const actionVerbs = {
   listening: 'listen'
 }
 
+// Section-specific introductory text
+const sectionIntroTexts = {
+  reading: {
+    firstLine: (totalQuestions) => `In the Reading section, you will answer ${totalQuestions} ${totalQuestions === 1 ? 'question' : 'questions'} to demonstrate how well you understand academic and non-academic texts in English.`,
+    secondLine: (taskTypesCount) => `There ${taskTypesCount === 1 ? 'is' : 'are'} ${taskTypesCount === 1 ? 'one' : taskTypesCount === 2 ? 'two' : taskTypesCount === 3 ? 'three' : taskTypesCount} ${taskTypesCount === 1 ? 'type' : 'types'} of ${taskTypesCount === 1 ? 'task' : 'tasks'}.`,
+    additionalLine: null
+  },
+  listening: {
+    firstLine: (totalQuestions) => `In the listening section, you will answer ${totalQuestions} ${totalQuestions === 1 ? 'question' : 'questions'} to demonstrate how well you understand spoken English.`,
+    secondLine: (taskTypesCount) => `There ${taskTypesCount === 1 ? 'is' : 'are'} ${taskTypesCount === 1 ? 'one' : taskTypesCount === 2 ? 'two' : taskTypesCount === 3 ? 'three' : taskTypesCount} ${taskTypesCount === 1 ? 'type' : 'types'} of ${taskTypesCount === 1 ? 'task' : 'tasks'}.`,
+    additionalLine: 'You **WILL NOT** be able to return to previous questions.'
+  },
+  writing: {
+    firstLine: (totalQuestions) => `In the writing section, you will answer ${totalQuestions} ${totalQuestions === 1 ? 'question' : 'questions'} to demonstrate how well you can write in English.`,
+    secondLine: (taskTypesCount) => `There ${taskTypesCount === 1 ? 'is' : 'are'} ${taskTypesCount === 1 ? 'one' : taskTypesCount === 2 ? 'two' : taskTypesCount === 3 ? 'three' : taskTypesCount} ${taskTypesCount === 1 ? 'type' : 'types'} of ${taskTypesCount === 1 ? 'task' : 'tasks'}.`,
+    additionalLine: null
+  },
+  speaking: {
+    firstLine: (totalQuestions) => `In the speaking section, you will answer ${totalQuestions} ${totalQuestions === 1 ? 'question' : 'questions'} to demonstrate how well you can speak English.`,
+    secondLine: (taskTypesCount) => `There ${taskTypesCount === 1 ? 'is' : 'are'} ${taskTypesCount === 1 ? 'one' : taskTypesCount === 2 ? 'two' : taskTypesCount === 3 ? 'three' : taskTypesCount} ${taskTypesCount === 1 ? 'type' : 'types'} of ${taskTypesCount === 1 ? 'task' : 'tasks'}.`,
+    additionalLine: null
+  }
+}
+
 function SectionIntro({ module }) {
   const section = module.section || 'speaking'
   const sectionName = module.sectionName || 'Section'
+  const { getVolumeDecimal } = useVolume()
+  const audioRef = useRef(null)
+  
+  // Initialize and play audio for listening and speaking sections
+  useEffect(() => {
+    if (section === 'listening' || section === 'speaking') {
+      const audioFile = section === 'listening' ? listeningIntroAudio : speakingIntroAudio
+      const audio = new Audio(audioFile)
+      audio.volume = getVolumeDecimal()
+      audio.loop = false
+      audioRef.current = audio
+
+      // Play audio after 1 second delay
+      const startTimer = setTimeout(() => {
+        if (audioRef.current) {
+          audioRef.current.play().catch(error => {
+            console.error('Error playing audio:', error)
+          })
+        }
+      }, 1000)
+
+      // Cleanup on unmount
+      return () => {
+        clearTimeout(startTimer)
+        if (audioRef.current) {
+          audioRef.current.pause()
+          audioRef.current.currentTime = 0
+          audioRef.current = null
+        }
+      }
+    }
+  }, [section, getVolumeDecimal])
+
+  // Update audio volume when volume changes
+  useEffect(() => {
+    if ((section === 'listening' || section === 'speaking') && audioRef.current) {
+      audioRef.current.volume = getVolumeDecimal()
+    }
+  }, [section, getVolumeDecimal])
   
   // Calculate total number of questions
   const totalQuestions = useMemo(() => {
@@ -122,12 +188,7 @@ function SectionIntro({ module }) {
 
   const headerColor = headerColors[section] || headerColors.reading
   const actionVerb = actionVerbs[section] || 'complete'
-  
-  // Convert number to word
-  const numberToWord = (num) => {
-    const words = ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten']
-    return words[num - 1] || num.toString()
-  }
+  const introText = sectionIntroTexts[section] || sectionIntroTexts.speaking
 
   return (
     <Box
@@ -182,7 +243,7 @@ function SectionIntro({ module }) {
             marginBottom: '4px',
           }}
         >
-          In the {section.toLowerCase()} section, you will answer {totalQuestions} {totalQuestions === 1 ? 'question' : 'questions'} to demonstrate how well you can {actionVerb} in English.
+          {introText.firstLine(totalQuestions)}
         </Typography>
         <Typography
           sx={{
@@ -190,10 +251,27 @@ function SectionIntro({ module }) {
             fontWeight: 400,
             color: '#000000',
             lineHeight: 1.6,
+            marginBottom: introText.additionalLine ? '4px' : 0,
           }}
         >
-          There {taskTypes.length === 1 ? 'is' : 'are'} {taskTypes.length === 1 ? 'one' : numberToWord(taskTypes.length)} {taskTypes.length === 1 ? 'type' : 'types'} of {taskTypes.length === 1 ? 'task' : 'tasks'}.
+          {introText.secondLine(taskTypes.length)}
         </Typography>
+        {introText.additionalLine && (
+          <Typography
+            sx={{
+              fontSize: '16px',
+              fontWeight: 400,
+              color: '#000000',
+              lineHeight: 1.6,
+            }}
+          >
+            You{' '}
+            <Box component="span" sx={{ fontWeight: 700 }}>
+              WILL NOT
+            </Box>{' '}
+            be able to return to previous questions.
+          </Typography>
+        )}
       </Box>
 
       {/* Table */}

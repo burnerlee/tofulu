@@ -1,10 +1,11 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { Box, Typography, Button } from '@mui/material'
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import TopNavigation from './TopNavigation'
 import SectionIntro from './SectionIntro'
 import SectionEnd from './SectionEnd'
+import TimeRemainingWarning from './TimeRemainingWarning'
 import PassageQuestion from './questions/PassageQuestion'
 import NoticeQuestion from './questions/NoticeQuestion'
 import PostQuestion from './questions/PostQuestion'
@@ -18,7 +19,7 @@ import ListenPassageQuestion from './questions/ListenPassageQuestion'
 import ListenAndRepeat from './questions/ListenAndRepeat'
 import InterviewerQuestion from './questions/InterviewerQuestion'
 
-function ModuleView({ module, assets, userAnswers, onAnswerChange, onComplete }) {
+function ModuleView({ module, assets, userAnswers, onAnswerChange, onComplete, skipIntro = false }) {
   // Create a list of bundles with their types and question counts
   const bundleList = useMemo(() => {
     return module.questions.map((bundle) => {
@@ -92,22 +93,50 @@ function ModuleView({ module, assets, userAnswers, onAnswerChange, onComplete })
   const [showTimer, setShowTimer] = useState(true)
   const [showIntro, setShowIntro] = useState(false)
   const [showEnd, setShowEnd] = useState(false)
+  const [showTimeWarning, setShowTimeWarning] = useState(false)
+  const [warningQuestionId, setWarningQuestionId] = useState(null)
   // Store timer states per question ID
   const [questionTimers, setQuestionTimers] = useState({}) // { questionId: { timeRemaining: number, isExpired: boolean } }
+  const endCompleteCalled = useRef(false)
+  // Track if intro is dismissed for current question (to trigger re-renders)
+  const [introDismissed, setIntroDismissed] = useState(false)
+  // Track which questions have been "left" (user clicked Continue on warning) - can't go back to these
+  const [leftQuestions, setLeftQuestions] = useState(new Set())
+  // Track which questions have seen intro (so it doesn't show again when going back)
+  const [questionsSeenIntro, setQuestionsSeenIntro] = useState(new Set())
+  // Track if speaking section intro is showing (for canGoNext updates)
+  const [speakingIntroShowing, setSpeakingIntroShowing] = useState(false)
+  // Refs for question components that have intro screens
+  const emailWritingRef = useRef(null)
+  const groupDiscussionWritingRef = useRef(null)
+  const buildTheSentenceRef = useRef(null)
+  const listenAndRepeatRef = useRef(null)
+  const interviewerQuestionRef = useRef(null)
 
   // Check if we should show intro screen (for all sections)
   useEffect(() => {
-    if (module.section === 'speaking' || module.section === 'writing' || 
-        module.section === 'reading' || module.section === 'listening') {
+    if (skipIntro) {
+      // Skip intro if handled at section level
+      setShowIntro(false)
+      setCurrentQuestionIndex(0)
+    } else if (module.section === 'speaking' || module.section === 'writing') {
+      // For speaking and writing, show intro in ModuleView
       setShowIntro(true)
       setCurrentQuestionIndex(-1)
+    } else if (module.section === 'reading' || module.section === 'listening') {
+      // For reading and listening, module start/end is handled at App level
+      // Skip intro in ModuleView
+      setShowIntro(false)
+      setCurrentQuestionIndex(0)
     } else {
       setShowIntro(false)
       setCurrentQuestionIndex(0)
     }
     setShowEnd(false) // Reset end screen when module changes
     setQuestionTimers({}) // Reset all timers when module changes
-  }, [module.id, module.section])
+    endCompleteCalled.current = false // Reset end complete flag when module changes
+    // Note: leftQuestions and questionsSeenIntro are NOT reset here - they persist across questions in the same module
+  }, [module.id, module.section, skipIntro])
 
   // Find current bundle index based on current question index
   const getCurrentBundleIndex = useMemo(() => {
@@ -169,9 +198,101 @@ function ModuleView({ module, assets, userAnswers, onAnswerChange, onComplete })
   const timerDuration = currentQuestionItem?.bundle?.timerDuration || currentQuestionItem?.question?.timerDuration || 10
   const currentQuestionId = currentQuestionItem?.question?.id
 
-  // Initialize timer for current question if it doesn't exist
+  // Track if intro is showing - check refs directly when needed
+  const isIntroShowing = () => {
+    if (currentQuestionItem?.bundleType === 'emailwriting' && emailWritingRef.current) {
+      return emailWritingRef.current.isShowingIntro()
+    }
+    if (currentQuestionItem?.bundleType === 'groupdiscussionwriting' && groupDiscussionWritingRef.current) {
+      return groupDiscussionWritingRef.current.isShowingIntro()
+    }
+    if (currentQuestionItem?.bundleType === 'buildthesentence' && buildTheSentenceRef.current) {
+      return buildTheSentenceRef.current.isShowingIntro()
+    }
+    // Check for speaking section intro screens
+    if (currentBundle?.type === 'listenandrepeat' && listenAndRepeatRef.current) {
+      return listenAndRepeatRef.current.isShowingIntro()
+    }
+    if (currentBundle?.type === 'interviewerquestion' && interviewerQuestionRef.current) {
+      return interviewerQuestionRef.current.isShowingIntro()
+    }
+    return false
+  }
+
+  // Update speakingIntroShowing state when intro visibility changes
+  // Use a polling approach since refs don't trigger re-renders
   useEffect(() => {
-    if (hasTimer && currentQuestionId) {
+    if (currentBundle?.type === 'listenandrepeat' || currentBundle?.type === 'interviewerquestion') {
+      // Check intro state immediately
+      const checkIntro = () => {
+        const isShowing = isIntroShowing()
+        setSpeakingIntroShowing(prev => {
+          if (prev !== isShowing) {
+            return isShowing
+          }
+          return prev
+        })
+      }
+      
+      checkIntro()
+      
+      // Poll every 100ms to catch changes (refs don't trigger re-renders)
+      const interval = setInterval(checkIntro, 100)
+      
+      return () => clearInterval(interval)
+    } else {
+      setSpeakingIntroShowing(false)
+    }
+  }, [currentBundle, currentQuestionIndex, currentQuestionItem])
+
+  // Reset intro dismissed state when question changes
+  useEffect(() => {
+    // Check if this question type has an intro screen
+    const hasIntroScreen = currentQuestionItem?.bundleType === 'emailwriting' || 
+                          currentQuestionItem?.bundleType === 'groupdiscussionwriting' || 
+                          currentQuestionItem?.bundleType === 'buildthesentence' ||
+                          currentBundle?.type === 'listenandrepeat' ||
+                          currentBundle?.type === 'interviewerquestion'
+    
+    // For speaking bundles, check if bundle has seen intro (using bundle ID or first question ID)
+    let bundleSeenIntro = false
+    if (currentBundle?.type === 'listenandrepeat' || currentBundle?.type === 'interviewerquestion') {
+      // Use bundle ID or first question ID to track if intro was seen
+      const bundleId = currentBundle.id || (currentBundle.childQuestions?.[0]?.id) || (currentBundle.InterviewerQuestions?.[0]?.id)
+      bundleSeenIntro = bundleId ? questionsSeenIntro.has(bundleId) : false
+    }
+    
+    // If question has already seen intro, don't show it again
+    if (currentQuestionId && questionsSeenIntro.has(currentQuestionId)) {
+      setIntroDismissed(true)
+    } else if (bundleSeenIntro) {
+      setIntroDismissed(true)
+    } else if (hasIntroScreen) {
+      // If has intro screen and hasn't seen it, set to false initially
+      setIntroDismissed(false)
+    } else {
+      // If no intro screen, set dismissed to true immediately so timer can start
+      setIntroDismissed(true)
+    }
+    
+    // Hide warning when question changes
+    setShowTimeWarning(false)
+    setWarningQuestionId(null)
+  }, [currentQuestionId, currentQuestionItem, currentBundle, questionsSeenIntro])
+
+  // Initialize timer for current question if it doesn't exist and intro is not showing
+  useEffect(() => {
+    // Check if this question type has an intro screen
+    const hasIntroScreen = currentQuestionItem?.bundleType === 'emailwriting' || 
+                          currentQuestionItem?.bundleType === 'groupdiscussionwriting' || 
+                          currentQuestionItem?.bundleType === 'buildthesentence'
+    
+    // If it has an intro screen, only initialize timer after intro is dismissed
+    // If it doesn't have an intro screen, initialize immediately
+    const shouldInitialize = hasTimer && currentQuestionId && 
+                            (!hasIntroScreen || (hasIntroScreen && introDismissed && !isIntroShowing()))
+    
+    if (shouldInitialize) {
       setQuestionTimers((prev) => {
         // Only initialize if timer doesn't exist for this question
         if (!prev[currentQuestionId]) {
@@ -186,7 +307,7 @@ function ModuleView({ module, assets, userAnswers, onAnswerChange, onComplete })
         return prev
       })
     }
-  }, [hasTimer, currentQuestionId, timerDuration])
+  }, [hasTimer, currentQuestionId, timerDuration, introDismissed, currentQuestionItem])
 
   // Get current question's timer state
   const currentTimer = currentQuestionId ? questionTimers[currentQuestionId] : null
@@ -235,6 +356,12 @@ function ModuleView({ module, assets, userAnswers, onAnswerChange, onComplete })
   }
 
   const handlePrevious = () => {
+    // If showing warning, go back to question
+    if (showTimeWarning) {
+      handleWarningBack()
+      return
+    }
+    
     // Check if the current bundle allows going back
     if (currentQuestionItem?.bundle?.allowBack === false) {
       return
@@ -243,16 +370,119 @@ function ModuleView({ module, assets, userAnswers, onAnswerChange, onComplete })
     if (currentBundle?.allowBack === false) {
       return
     }
+    
+    // Check if we can go back - need to find the previous question and check if it was left
     if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex(currentQuestionIndex - 1)
+      // Find the previous question index
+      const previousIndex = currentQuestionIndex - 1
+      
+      // Find which question this corresponds to
+      let questionCount = 0
+      let previousQuestionId = null
+      
+      for (let i = 0; i < bundleList.length; i++) {
+        const bundle = bundleList[i]
+        if (bundle.type === 'fillin' || bundle.type === 'listenandrepeat' || bundle.type === 'interviewerquestion') {
+          if (previousIndex >= questionCount && previousIndex < questionCount + bundle.questionCount) {
+            // This is a special bundle type - can't navigate to individual questions
+            // For these, we need to check if any question in the bundle was left
+            if (bundle.type === 'fillin' && bundle.bundle.questions) {
+              // Check if any question in this fillin bundle was left
+              const hasLeftQuestion = bundle.bundle.questions.some(q => leftQuestions.has(q.id))
+              if (hasLeftQuestion) {
+                return // Can't go back if any question in the bundle was left
+              }
+            }
+            // For listenandrepeat and interviewerquestion, we can't go back to parent anyway
+            break
+          }
+          questionCount += bundle.questionCount
+        } else {
+          if (previousIndex >= questionCount && previousIndex < questionCount + bundle.questionCount) {
+            // Found the bundle - get the specific question
+            const positionInBundle = previousIndex - questionCount
+            if (bundle.bundle.questions && bundle.bundle.questions[positionInBundle]) {
+              previousQuestionId = bundle.bundle.questions[positionInBundle].id
+            }
+            break
+          }
+          questionCount += bundle.questionCount
+        }
+      }
+      
+      // Check if the previous question was "left" (user clicked Continue on warning) - can't go back
+      if (previousQuestionId && leftQuestions.has(previousQuestionId)) {
+        return
+      }
+      
+      setCurrentQuestionIndex(previousIndex)
     }
   }
 
   const handleNext = () => {
-    // For ListenAndRepeat and InterviewerQuestion, disable Next button completely
+    // Check for speaking section intro screens first (before checking if Next is disabled)
+    if (currentBundle?.type === 'listenandrepeat' && listenAndRepeatRef.current) {
+      if (listenAndRepeatRef.current.isShowingIntro()) {
+        listenAndRepeatRef.current.dismissIntro()
+        setIntroDismissed(true)
+        // Track that this bundle has seen intro
+        const bundleId = currentBundle.id || (currentBundle.childQuestions?.[0]?.id)
+        if (bundleId) {
+          setQuestionsSeenIntro(prev => new Set(prev).add(bundleId))
+        }
+        return
+      }
+    }
+    if (currentBundle?.type === 'interviewerquestion' && interviewerQuestionRef.current) {
+      if (interviewerQuestionRef.current.isShowingIntro()) {
+        interviewerQuestionRef.current.dismissIntro()
+        setIntroDismissed(true)
+        // Track that this bundle has seen intro
+        const bundleId = currentBundle.id || (currentBundle.InterviewerQuestions?.[0]?.id)
+        if (bundleId) {
+          setQuestionsSeenIntro(prev => new Set(prev).add(bundleId))
+        }
+        return
+      }
+    }
+    
+    // For ListenAndRepeat and InterviewerQuestion (when not showing intro), disable Next button completely
     if (currentBundle?.type === 'listenandrepeat' || currentBundle?.type === 'interviewerquestion') {
       return
     }
+    
+    // Check if we're showing an intro screen - if so, dismiss it instead of moving to next
+    if (currentQuestionItem?.bundleType === 'emailwriting' && emailWritingRef.current) {
+      if (emailWritingRef.current.isShowingIntro()) {
+        emailWritingRef.current.dismissIntro()
+        setIntroDismissed(true)
+        if (currentQuestionId) {
+          setQuestionsSeenIntro(prev => new Set(prev).add(currentQuestionId))
+        }
+        return
+      }
+    }
+    if (currentQuestionItem?.bundleType === 'groupdiscussionwriting' && groupDiscussionWritingRef.current) {
+      if (groupDiscussionWritingRef.current.isShowingIntro()) {
+        groupDiscussionWritingRef.current.dismissIntro()
+        setIntroDismissed(true)
+        if (currentQuestionId) {
+          setQuestionsSeenIntro(prev => new Set(prev).add(currentQuestionId))
+        }
+        return
+      }
+    }
+    if (currentQuestionItem?.bundleType === 'buildthesentence' && buildTheSentenceRef.current) {
+      if (buildTheSentenceRef.current.isShowingIntro()) {
+        buildTheSentenceRef.current.dismissIntro()
+        setIntroDismissed(true)
+        if (currentQuestionId) {
+          setQuestionsSeenIntro(prev => new Set(prev).add(currentQuestionId))
+        }
+        return
+      }
+    }
+    
     // Check if current question requires an answer before proceeding
     if (currentQuestionItem?.question?.required) {
       const questionId = currentQuestionItem.question.id
@@ -277,6 +507,40 @@ function ModuleView({ module, assets, userAnswers, onAnswerChange, onComplete })
       }
     }
 
+    // Check if this is a timed question with time remaining - show warning instead
+    if (hasTimer && currentQuestionId && currentTimer && !currentTimer.isExpired && currentTimer.timeRemaining > 0) {
+      setShowTimeWarning(true)
+      setWarningQuestionId(currentQuestionId)
+      return
+    }
+
+    // Calculate total navigation items
+    const totalItems = bundleList.reduce((sum, bundle) => {
+      return sum + bundle.questionCount
+    }, 0)
+
+    if (currentQuestionIndex < totalItems - 1) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1)
+    } else {
+      // On the last question, show the end screen
+      setShowEnd(true)
+    }
+  }
+
+  const handleWarningBack = () => {
+    // Go back to the question - don't show intro again
+    setShowTimeWarning(false)
+    setWarningQuestionId(null)
+  }
+
+  const handleWarningContinue = () => {
+    // Mark this question as "left" - can't go back to it
+    if (warningQuestionId) {
+      setLeftQuestions(prev => new Set(prev).add(warningQuestionId))
+    }
+    setShowTimeWarning(false)
+    setWarningQuestionId(null)
+    
     // Calculate total navigation items
     const totalItems = bundleList.reduce((sum, bundle) => {
       return sum + bundle.questionCount
@@ -301,6 +565,10 @@ function ModuleView({ module, assets, userAnswers, onAnswerChange, onComplete })
 
   // Calculate navigation state
   const canGoPrevious = useMemo(() => {
+    // If showing warning, can always go back to question
+    if (showTimeWarning) {
+      return true
+    }
     // For ListenAndRepeat and InterviewerQuestion, disable Previous button completely
     if (currentBundle?.type === 'listenandrepeat' || currentBundle?.type === 'interviewerquestion') {
       return false
@@ -313,13 +581,71 @@ function ModuleView({ module, assets, userAnswers, onAnswerChange, onComplete })
     if (currentBundle?.allowBack === false) {
       return false
     }
-    return currentQuestionIndex > 0
-  }, [currentQuestionIndex, currentQuestionItem, currentBundle])
+    
+    // Check if we can go back - need to check if previous question was left
+    if (currentQuestionIndex <= 0) {
+      return false
+    }
+    
+    // Find the previous question using the same logic as getFlattenedQuestionIndex
+    const previousNavIndex = currentQuestionIndex - 1
+    let flattenedIndex = 0
+    let navigationIndex = 0
+    let previousQuestionId = null
+    
+    for (let i = 0; i < bundleList.length; i++) {
+      const bundle = bundleList[i]
+      if (bundle.type === 'fillin' || bundle.type === 'listenandrepeat' || bundle.type === 'interviewerquestion') {
+        if (previousNavIndex >= navigationIndex && previousNavIndex < navigationIndex + bundle.questionCount) {
+          // This is a special bundle type
+          if (bundle.type === 'fillin' && bundle.bundle.questions) {
+            // Check if any question in this fillin bundle was left
+            const hasLeftQuestion = bundle.bundle.questions.some(q => leftQuestions.has(q.id))
+            if (hasLeftQuestion) {
+              return false // Can't go back if any question in the bundle was left
+            }
+          }
+          // For listenandrepeat and interviewerquestion, we can't go back to parent anyway
+          return false
+        }
+        navigationIndex += bundle.questionCount
+      } else {
+        if (previousNavIndex >= navigationIndex && previousNavIndex < navigationIndex + bundle.questionCount) {
+          // Found the bundle - get the specific question using flattenedQuestions
+          const positionInBundle = previousNavIndex - navigationIndex
+          const previousFlattenedIndex = flattenedIndex + positionInBundle
+          if (previousFlattenedIndex >= 0 && previousFlattenedIndex < flattenedQuestions.length) {
+            const previousQuestionItem = flattenedQuestions[previousFlattenedIndex]
+            if (previousQuestionItem) {
+              previousQuestionId = previousQuestionItem.question.id
+            }
+          }
+          break
+        }
+        navigationIndex += bundle.questionCount
+        flattenedIndex += bundle.questionCount
+      }
+    }
+    
+    // Check if the previous question was "left" (user clicked Continue on warning) - can't go back
+    if (previousQuestionId && leftQuestions.has(previousQuestionId)) {
+      return false
+    }
+    
+    return true
+  }, [currentQuestionIndex, currentQuestionItem, currentBundle, showTimeWarning, leftQuestions, bundleList, flattenedQuestions])
 
   const canGoNext = useMemo(() => {
-    // For ListenAndRepeat and InterviewerQuestion, disable Next button completely
-    if (currentBundle?.type === 'listenandrepeat' || currentBundle?.type === 'interviewerquestion') {
-      return false
+    // If showing warning, can always continue
+    if (showTimeWarning) {
+      return true
+    }
+    // For ListenAndRepeat and InterviewerQuestion, enable Next only if showing intro
+    if (currentBundle?.type === 'listenandrepeat') {
+      return speakingIntroShowing
+    }
+    if (currentBundle?.type === 'interviewerquestion') {
+      return speakingIntroShowing
     }
     // Check if current question requires an answer
     if (currentQuestionItem?.question?.required) {
@@ -345,7 +671,7 @@ function ModuleView({ module, assets, userAnswers, onAnswerChange, onComplete })
     
     // Always enable Next button - on last question it will complete the module
     return true
-  }, [currentQuestionIndex, bundleList, currentQuestionItem, currentBundle, userAnswers])
+  }, [currentQuestionIndex, bundleList, currentQuestionItem, currentBundle, userAnswers, showTimeWarning, speakingIntroShowing])
 
   // Calculate total number of actual questions (not navigation positions)
   const getTotalActualQuestions = useMemo(() => {
@@ -471,18 +797,35 @@ function ModuleView({ module, assets, userAnswers, onAnswerChange, onComplete })
   }
 
   // Show end screen when all questions are completed
+  // Note: Section end is now handled at the App level, so we just call onComplete once
+  useEffect(() => {
+    if (showEnd && !endCompleteCalled.current) {
+      endCompleteCalled.current = true
+      onComplete()
+    }
+  }, [showEnd, onComplete])
+
   if (showEnd) {
+    // Return null while waiting for App to handle section end
+    return null
+  }
+
+  // Show time remaining warning screen
+  if (showTimeWarning && warningQuestionId) {
+    const warningTimer = questionTimers[warningQuestionId]
+    const warningTimeRemaining = warningTimer?.timeRemaining ?? 0
     return (
-      <SectionEnd
-        sectionName={module.sectionName}
-        onNext={handleEndNext}
+      <TimeRemainingWarning
+        timeRemaining={warningTimeRemaining}
+        onBack={handleWarningBack}
+        onContinue={handleWarningContinue}
       />
     )
   }
 
-  // Show intro screen for all sections
-  if (showIntro && (module.section === 'speaking' || module.section === 'writing' || 
-      module.section === 'reading' || module.section === 'listening')) {
+  // Show intro screen for speaking and writing sections only
+  // (reading and listening use module start/end at App level)
+  if (showIntro && (module.section === 'speaking' || module.section === 'writing')) {
     return (
       <Box className="min-h-screen bg-white">
         {/* Top Navigation Bar with Begin button */}
@@ -581,8 +924,8 @@ function ModuleView({ module, assets, userAnswers, onAnswerChange, onComplete })
           {module.sectionName} | {getQuestionRange()}
         </Typography>
         
-        {/* Timer - only show for questions with timer */}
-        {hasTimer && showTimer && (
+        {/* Timer - only show for questions with timer and when intro is not showing and not showing warning */}
+        {hasTimer && showTimer && !isIntroShowing() && !showTimeWarning && (
           <Box sx={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
             <Typography
               sx={{
@@ -663,12 +1006,18 @@ function ModuleView({ module, assets, userAnswers, onAnswerChange, onComplete })
           const isParent = positionInBundle === 0
           const childIndex = isParent ? -1 : positionInBundle - 1
           
+          // Check if bundle has seen intro
+          const bundleId = currentBundle.id || (currentBundle.childQuestions?.[0]?.id)
+          const hasSeenIntro = bundleId ? questionsSeenIntro.has(bundleId) : false
+          
           return (
             <ListenAndRepeat
+              ref={listenAndRepeatRef}
               bundle={currentBundle}
               assets={assets}
               isParent={isParent}
               currentChildIndex={childIndex}
+              hasSeenIntro={hasSeenIntro}
               onNextChild={() => {
                 // Move to next child or next bundle
                 const nextIndex = currentQuestionIndex + 1
@@ -692,12 +1041,18 @@ function ModuleView({ module, assets, userAnswers, onAnswerChange, onComplete })
           const isParent = positionInBundle === 0
           const childIndex = isParent ? -1 : positionInBundle - 1
           
+          // Check if bundle has seen intro
+          const bundleId = currentBundle.id || (currentBundle.InterviewerQuestions?.[0]?.id)
+          const hasSeenIntro = bundleId ? questionsSeenIntro.has(bundleId) : false
+          
           return (
             <InterviewerQuestion
+              ref={interviewerQuestionRef}
               bundle={currentBundle}
               assets={assets}
               isParent={isParent}
               currentChildIndex={childIndex}
+              hasSeenIntro={hasSeenIntro}
               onNextChild={() => {
                 // Move to next child or next bundle
                 const nextIndex = currentQuestionIndex + 1
@@ -747,30 +1102,36 @@ function ModuleView({ module, assets, userAnswers, onAnswerChange, onComplete })
             )}
             {currentQuestionItem.bundleType === 'emailwriting' && (
               <EmailWriting
+                ref={emailWritingRef}
                 bundle={currentQuestionItem.bundle}
                 question={currentQuestionItem.question}
                 userAnswers={userAnswers}
                 onAnswerChange={handleAnswerChange}
                 isTimerExpired={isTimerExpired}
+                hasSeenIntro={currentQuestionId ? questionsSeenIntro.has(currentQuestionId) : false}
               />
             )}
             {currentQuestionItem.bundleType === 'groupdiscussionwriting' && (
               <GroupDiscussionWriting
+                ref={groupDiscussionWritingRef}
                 bundle={currentQuestionItem.bundle}
                 question={currentQuestionItem.question}
                 userAnswers={userAnswers}
                 onAnswerChange={handleAnswerChange}
                 isTimerExpired={isTimerExpired}
                 assets={assets}
+                hasSeenIntro={currentQuestionId ? questionsSeenIntro.has(currentQuestionId) : false}
               />
             )}
             {currentQuestionItem.bundleType === 'buildthesentence' && (
               <BuildTheSentence
+                ref={buildTheSentenceRef}
                 bundle={currentQuestionItem.bundle}
                 question={currentQuestionItem.question}
                 userAnswers={userAnswers}
                 onAnswerChange={handleAnswerChange}
                 assets={assets}
+                hasSeenIntro={currentQuestionId ? questionsSeenIntro.has(currentQuestionId) : false}
               />
             )}
             {currentQuestionItem.bundleType === 'bestresponse' && (

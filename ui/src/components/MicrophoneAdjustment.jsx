@@ -7,9 +7,10 @@ import CancelIcon from '@mui/icons-material/Cancel'
 import MicIcon from '@mui/icons-material/Mic'
 import CloseIcon from '@mui/icons-material/Close'
 import { useVolume } from '../contexts/VolumeContext'
+import microphoneAdjustAudio from '../audios/microphoneAdjust.mp3'
 
 function MicrophoneAdjustment({ onContinue }) {
-  const { volume, setVolume } = useVolume()
+  const { volume, setVolume, getVolumeDecimal } = useVolume()
   const [showVolumeControl, setShowVolumeControl] = useState(false)
   const [microphoneLevel, setMicrophoneLevel] = useState(0) // 0-15 for 15 bars
   const [volumeStatus, setVolumeStatus] = useState(null) // 'good', 'too-loud', 'too-quiet'
@@ -31,18 +32,62 @@ function MicrophoneAdjustment({ onContinue }) {
   const volumeButtonRef = useRef(null)
   const popupRef = useRef(null)
   const isRecordingRef = useRef(false)
+  const audioRef = useRef(null)
+
+  // Initialize audio element
+  useEffect(() => {
+    const audio = new Audio(microphoneAdjustAudio)
+    audio.volume = getVolumeDecimal()
+    audio.loop = false
+    audioRef.current = audio
+
+    // Show popup when audio completes
+    const handleAudioEnd = () => {
+      setShowRecordingPopup(true)
+    }
+
+    audio.addEventListener('ended', handleAudioEnd)
+
+    // Cleanup on unmount
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.removeEventListener('ended', handleAudioEnd)
+        audioRef.current.pause()
+        audioRef.current.currentTime = 0
+        audioRef.current = null
+      }
+    }
+  }, [getVolumeDecimal])
+
+  // Handle audio playback - start after 1 second delay
+  useEffect(() => {
+    const startTimer = setTimeout(() => {
+      if (audioRef.current) {
+        audioRef.current.play().catch(error => {
+          console.error('Error playing audio:', error)
+        })
+      }
+    }, 1000)
+
+    return () => {
+      clearTimeout(startTimer)
+    }
+  }, [])
+
+  // Update audio volume when volume changes
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = getVolumeDecimal()
+    }
+  }, [volume, getVolumeDecimal])
 
   useEffect(() => {
-    // Set timer for popup after 5 seconds
-    popupTimerRef.current = setTimeout(() => {
-      setShowRecordingPopup(true)
-    }, 5000)
-
     return () => {
       // Cleanup
       stopMicrophoneMonitoring()
-      if (popupTimerRef.current) {
-        clearTimeout(popupTimerRef.current)
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current.currentTime = 0
       }
       if (countdownTimerRef.current) {
         clearInterval(countdownTimerRef.current)
@@ -245,6 +290,26 @@ function MicrophoneAdjustment({ onContinue }) {
 
   const handleSuccessContinue = () => {
     setShowSuccessPopup(false)
+    // Stop audio before navigating away
+    if (audioRef.current) {
+      audioRef.current.pause()
+      audioRef.current.currentTime = 0
+    }
+    onContinue()
+  }
+
+  const handleContinue = () => {
+    // Stop audio before navigating away
+    if (audioRef.current) {
+      audioRef.current.pause()
+      audioRef.current.currentTime = 0
+    }
+    // Stop any recording in progress
+    stopRecording()
+    // Close all popups
+    setShowRecordingPopup(false)
+    setShowSuccessPopup(false)
+    setShowVolumeControl(false)
     onContinue()
   }
 
@@ -350,11 +415,10 @@ function MicrophoneAdjustment({ onContinue }) {
 
           {/* Continue button */}
           <Button
-            onClick={onContinue}
-            disabled={!micConfigured}
+            onClick={handleContinue}
             sx={{
-              backgroundColor: micConfigured ? '#e0e0e0' : '#f0f0f0',
-              color: micConfigured ? '#424242' : '#9e9e9e',
+              backgroundColor: '#e0e0e0',
+              color: '#424242',
               borderRadius: '8px',
               padding: '8px 16px',
               textTransform: 'none',
@@ -363,12 +427,8 @@ function MicrophoneAdjustment({ onContinue }) {
               minWidth: 'auto',
               boxShadow: 'none',
               '&:hover': {
-                backgroundColor: micConfigured ? '#d0d0d0' : '#f0f0f0',
+                backgroundColor: '#d0d0d0',
                 boxShadow: 'none',
-              },
-              '&:disabled': {
-                backgroundColor: '#f0f0f0',
-                color: '#9e9e9e',
               },
             }}
             endIcon={<ArrowForwardIcon sx={{ fontSize: '18px' }} />}

@@ -4,12 +4,60 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import VolumeUpIcon from '@mui/icons-material/VolumeUp'
 import CloseIcon from '@mui/icons-material/Close'
 import { useVolume } from '../contexts/VolumeContext'
+import volumeAdjustAudio from '../audios/volumeAdjust.mp3'
 
 function VolumeAdjustment({ onContinue }) {
-  const { volume, setVolume } = useVolume()
+  const { volume, setVolume, getVolumeDecimal } = useVolume()
   const [showVolumeControl, setShowVolumeControl] = useState(false)
   const volumeButtonRef = useRef(null)
   const popupRef = useRef(null)
+  const audioRef = useRef(null)
+
+  // Handle audio playback - start after 1 second delay
+  useEffect(() => {
+    const startTimer = setTimeout(() => {
+      if (audioRef.current) {
+        audioRef.current.play().catch(error => {
+          console.error('Error playing audio:', error)
+        })
+      }
+    }, 1000)
+
+    return () => {
+      clearTimeout(startTimer)
+    }
+  }, [])
+
+  // Initialize audio element
+  useEffect(() => {
+    const audio = new Audio(volumeAdjustAudio)
+    audio.volume = getVolumeDecimal()
+    audio.loop = false
+    audioRef.current = audio
+
+    // Update volume when volume context changes
+    const updateVolume = () => {
+      if (audioRef.current) {
+        audioRef.current.volume = getVolumeDecimal()
+      }
+    }
+
+    // Cleanup on unmount
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current.currentTime = 0
+        audioRef.current = null
+      }
+    }
+  }, [getVolumeDecimal])
+
+  // Update audio volume when volume changes
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = getVolumeDecimal()
+    }
+  }, [volume, getVolumeDecimal])
 
   // Handle click outside to close popup
   useEffect(() => {
@@ -48,6 +96,15 @@ function VolumeAdjustment({ onContinue }) {
 
   const handleClosePopup = () => {
     setShowVolumeControl(false)
+  }
+
+  const handleContinue = () => {
+    // Stop audio before navigating away
+    if (audioRef.current) {
+      audioRef.current.pause()
+      audioRef.current.currentTime = 0
+    }
+    onContinue()
   }
 
   // Generate volume bars based on volume level
@@ -118,7 +175,7 @@ function VolumeAdjustment({ onContinue }) {
 
           {/* Continue button */}
           <Button
-            onClick={onContinue}
+            onClick={handleContinue}
             sx={{
               backgroundColor: '#e0e0e0', // Light grey background
               color: '#424242', // Dark grey text

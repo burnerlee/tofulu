@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from 'react'
-import { Box, Typography, TextareaAutosize, Button } from '@mui/material'
+import { useState, useRef, useEffect, useImperativeHandle, forwardRef } from 'react'
+import { Box, Typography, TextareaAutosize, Button, Divider } from '@mui/material'
 import ContentCutIcon from '@mui/icons-material/ContentCut'
 import ContentPasteIcon from '@mui/icons-material/ContentPaste'
 import UndoIcon from '@mui/icons-material/Undo'
@@ -7,7 +7,11 @@ import RedoIcon from '@mui/icons-material/Redo'
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
 
-function EmailWriting({ bundle, question, userAnswers, onAnswerChange, isTimerExpired = false }) {
+const EmailWriting = forwardRef(function EmailWriting({ bundle, question, userAnswers, onAnswerChange, isTimerExpired = false, hasSeenIntro = false }, ref) {
+  // Check if this is the first question in the bundle
+  const isFirstQuestion = bundle.questions && bundle.questions[0]?.id === question.id
+  const [showIntro, setShowIntro] = useState(() => bundle.questions && bundle.questions[0]?.id === question.id && !hasSeenIntro)
+
   const textAreaRef = useRef(null)
   const [wordCount, setWordCount] = useState(0)
   const [showWordCount, setShowWordCount] = useState(true)
@@ -19,6 +23,24 @@ function EmailWriting({ bundle, question, userAnswers, onAnswerChange, isTimerEx
   const historyIndexRef = useRef(-1)
 
   const currentAnswer = userAnswers[question.id] || ''
+
+  // Reset intro state when question changes
+  useEffect(() => {
+    const shouldShowIntro = bundle.questions && bundle.questions[0]?.id === question.id && !hasSeenIntro
+    setShowIntro(shouldShowIntro)
+  }, [question.id, bundle.questions, hasSeenIntro])
+
+  // Expose method to dismiss intro
+  useImperativeHandle(ref, () => ({
+    dismissIntro: () => {
+      if (showIntro && isFirstQuestion) {
+        setShowIntro(false)
+        return true // Return true if intro was dismissed
+      }
+      return false // Return false if no intro to dismiss
+    },
+    isShowingIntro: () => showIntro && isFirstQuestion
+  }), [showIntro, isFirstQuestion])
 
   // Update word count when answer changes
   useEffect(() => {
@@ -131,6 +153,78 @@ function EmailWriting({ bundle, question, userAnswers, onAnswerChange, isTimerEx
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // Intro screen
+  if (showIntro && isFirstQuestion) {
+    return (
+      <Box
+        sx={{
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          padding: '64px 48px 48px 64px',
+          maxWidth: '900px',
+          margin: '0 auto',
+          width: '100%',
+        }}
+      >
+        {/* Title */}
+        <Typography
+          sx={{
+            fontSize: '32px',
+            fontWeight: 600,
+            color: '#424242',
+            marginBottom: '16px',
+            textAlign: 'left',
+            fontFamily: 'inherit',
+          }}
+        >
+          Write an Email
+        </Typography>
+
+        {/* Divider line */}
+        <Divider
+          sx={{
+            width: '100%',
+            marginBottom: '32px',
+            borderColor: '#e0e0e0',
+          }}
+        />
+
+        {/* Instructions */}
+        <Box
+          sx={{
+            textAlign: 'left',
+            maxWidth: '800px',
+          }}
+        >
+          <Typography
+            sx={{
+              fontSize: '16px',
+              fontWeight: 400,
+              color: '#424242',
+              lineHeight: 1.6,
+              marginBottom: '16px',
+              fontFamily: 'inherit',
+            }}
+          >
+            You will read some information and use the information to write an email.
+          </Typography>
+          <Typography
+            sx={{
+              fontSize: '16px',
+              fontWeight: 400,
+              color: '#424242',
+              lineHeight: 1.6,
+              fontFamily: 'inherit',
+            }}
+          >
+            You will have 7 minutes to write the email.
+          </Typography>
+        </Box>
+      </Box>
+    )
+  }
 
   return (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
@@ -444,6 +538,6 @@ function EmailWriting({ bundle, question, userAnswers, onAnswerChange, isTimerEx
       </Box>
     </Box>
   )
-}
+})
 
 export default EmailWriting

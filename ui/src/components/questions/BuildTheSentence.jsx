@@ -1,12 +1,34 @@
-import { useState } from 'react'
-import { Box, Typography, Avatar } from '@mui/material'
+import { useState, useEffect, useImperativeHandle, forwardRef } from 'react'
+import { Box, Typography, Avatar, Divider } from '@mui/material'
 
-function BuildTheSentence({ bundle, question, userAnswers, onAnswerChange, assets }) {
+const BuildTheSentence = forwardRef(function BuildTheSentence({ bundle, question, userAnswers, onAnswerChange, assets, hasSeenIntro = false }, ref) {
+  // Check if this is the first question in the bundle
+  const isFirstQuestion = bundle.questions && bundle.questions[0]?.id === question.id
+  const [showIntro, setShowIntro] = useState(() => bundle.questions && bundle.questions[0]?.id === question.id && !hasSeenIntro)
+
   const characterOneImageID = bundle.characterOneImageID || question.characterOneImageID
   const characterTwoImageID = bundle.characterTwoImageID || question.characterTwoImageID
   const sentence1 = bundle.sentence1 || question.sentence1 || ''
   const sentence2 = bundle.sentence2 || question.sentence2 || ''
   const jumbledPhrases = bundle.jumbledPhrases || question.jumbledPhrases || []
+
+  // Reset intro state when question changes
+  useEffect(() => {
+    const shouldShowIntro = bundle.questions && bundle.questions[0]?.id === question.id && !hasSeenIntro
+    setShowIntro(shouldShowIntro)
+  }, [question.id, bundle.questions, hasSeenIntro])
+
+  // Expose method to dismiss intro
+  useImperativeHandle(ref, () => ({
+    dismissIntro: () => {
+      if (showIntro && isFirstQuestion) {
+        setShowIntro(false)
+        return true // Return true if intro was dismissed
+      }
+      return false // Return false if no intro to dismiss
+    },
+    isShowingIntro: () => showIntro && isFirstQuestion
+  }), [showIntro, isFirstQuestion])
 
   // Parse sentence2 to find blanks (represented as underscores or placeholders)
   // Assuming blanks are represented as "______" or similar
@@ -198,6 +220,78 @@ function BuildTheSentence({ bundle, question, userAnswers, onAnswerChange, asset
     })
   }
 
+  // Intro screen
+  if (showIntro && isFirstQuestion) {
+    return (
+      <Box
+        sx={{
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          padding: '64px 48px 48px 64px',
+          maxWidth: '900px',
+          margin: '0 auto',
+          width: '100%',
+        }}
+      >
+        {/* Title */}
+        <Typography
+          sx={{
+            fontSize: '32px',
+            fontWeight: 600,
+            color: '#424242',
+            marginBottom: '16px',
+            textAlign: 'left',
+            fontFamily: 'inherit',
+          }}
+        >
+          Build a Sentence
+        </Typography>
+
+        {/* Divider line */}
+        <Divider
+          sx={{
+            width: '100%',
+            marginBottom: '32px',
+            borderColor: '#e0e0e0',
+          }}
+        />
+
+        {/* Instructions */}
+        <Box
+          sx={{
+            textAlign: 'left',
+            maxWidth: '800px',
+          }}
+        >
+          <Typography
+            sx={{
+              fontSize: '16px',
+              fontWeight: 400,
+              color: '#424242',
+              lineHeight: 1.6,
+              marginBottom: '16px',
+              fontFamily: 'inherit',
+            }}
+          >
+            Move the words in the boxes to create grammatical sentences.
+          </Typography>
+          <Typography
+            sx={{
+              fontSize: '16px',
+              fontWeight: 400,
+              color: '#424242',
+              lineHeight: 1.6,
+              fontFamily: 'inherit',
+            }}
+          >
+            In an actual test, a clock will show you how much time you have to complete this task.
+          </Typography>
+        </Box>
+      </Box>
+    )
+  }
+
   return (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: '24px' }}>
       {/* Instruction */}
@@ -340,7 +434,7 @@ function BuildTheSentence({ bundle, question, userAnswers, onAnswerChange, asset
       </Box>
     </Box>
   )
-}
+})
 
 export default BuildTheSentence
 

@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from 'react'
-import { Box, Typography, TextareaAutosize, Button, Avatar } from '@mui/material'
+import { useState, useRef, useEffect, useImperativeHandle, forwardRef } from 'react'
+import { Box, Typography, TextareaAutosize, Button, Avatar, Divider } from '@mui/material'
 import ContentCutIcon from '@mui/icons-material/ContentCut'
 import ContentPasteIcon from '@mui/icons-material/ContentPaste'
 import UndoIcon from '@mui/icons-material/Undo'
@@ -7,7 +7,11 @@ import RedoIcon from '@mui/icons-material/Redo'
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
 
-function GroupDiscussionWriting({ bundle, question, userAnswers, onAnswerChange, isTimerExpired = false, assets }) {
+const GroupDiscussionWriting = forwardRef(function GroupDiscussionWriting({ bundle, question, userAnswers, onAnswerChange, isTimerExpired = false, assets, hasSeenIntro = false }, ref) {
+  // Check if this is the first question in the bundle
+  const isFirstQuestion = bundle.questions && bundle.questions[0]?.id === question.id
+  const [showIntro, setShowIntro] = useState(() => bundle.questions && bundle.questions[0]?.id === question.id && !hasSeenIntro)
+
   const textAreaRef = useRef(null)
   const [wordCount, setWordCount] = useState(0)
   const [showWordCount, setShowWordCount] = useState(true)
@@ -21,6 +25,24 @@ function GroupDiscussionWriting({ bundle, question, userAnswers, onAnswerChange,
   const currentAnswer = userAnswers[question.id] || ''
   const comments = bundle.comments || question.comments || []
   const professorImageID = bundle.professorImageID || question.professorImageID
+
+  // Reset intro state when question changes
+  useEffect(() => {
+    const shouldShowIntro = bundle.questions && bundle.questions[0]?.id === question.id && !hasSeenIntro
+    setShowIntro(shouldShowIntro)
+  }, [question.id, bundle.questions, hasSeenIntro])
+
+  // Expose method to dismiss intro
+  useImperativeHandle(ref, () => ({
+    dismissIntro: () => {
+      if (showIntro && isFirstQuestion) {
+        setShowIntro(false)
+        return true // Return true if intro was dismissed
+      }
+      return false // Return false if no intro to dismiss
+    },
+    isShowingIntro: () => showIntro && isFirstQuestion
+  }), [showIntro, isFirstQuestion])
 
   // Update word count when answer changes
   useEffect(() => {
@@ -133,6 +155,78 @@ function GroupDiscussionWriting({ bundle, question, userAnswers, onAnswerChange,
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // Intro screen
+  if (showIntro && isFirstQuestion) {
+    return (
+      <Box
+        sx={{
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          padding: '64px 48px 48px 64px',
+          maxWidth: '900px',
+          margin: '0 auto',
+          width: '100%',
+        }}
+      >
+        {/* Title */}
+        <Typography
+          sx={{
+            fontSize: '32px',
+            fontWeight: 600,
+            color: '#424242',
+            marginBottom: '16px',
+            textAlign: 'left',
+            fontFamily: 'inherit',
+          }}
+        >
+          Write for an Academic Discussion
+        </Typography>
+
+        {/* Divider line */}
+        <Divider
+          sx={{
+            width: '100%',
+            marginBottom: '32px',
+            borderColor: '#e0e0e0',
+          }}
+        />
+
+        {/* Instructions */}
+        <Box
+          sx={{
+            textAlign: 'left',
+            maxWidth: '800px',
+          }}
+        >
+          <Typography
+            sx={{
+              fontSize: '16px',
+              fontWeight: 400,
+              color: '#424242',
+              lineHeight: 1.6,
+              marginBottom: '16px',
+              fontFamily: 'inherit',
+            }}
+          >
+            A professor has posted a question about a topic and students have responded with their thoughts and ideas. Make a contribution to the discussion.
+          </Typography>
+          <Typography
+            sx={{
+              fontSize: '16px',
+              fontWeight: 400,
+              color: '#424242',
+              lineHeight: 1.6,
+              fontFamily: 'inherit',
+            }}
+          >
+            You will have 10 minutes to write.
+          </Typography>
+        </Box>
+      </Box>
+    )
+  }
 
   return (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
@@ -452,7 +546,7 @@ function GroupDiscussionWriting({ bundle, question, userAnswers, onAnswerChange,
       </Box>
     </Box>
   )
-}
+})
 
 export default GroupDiscussionWriting
 

@@ -1,10 +1,11 @@
-import { useState, useEffect, useRef } from 'react'
-import { Box, Typography, Modal } from '@mui/material'
+import { useState, useEffect, useRef, useImperativeHandle, forwardRef } from 'react'
+import { Box, Typography, Modal, Divider } from '@mui/material'
 import MicIcon from '@mui/icons-material/Mic'
 import MicOffIcon from '@mui/icons-material/MicOff'
 import { useVolume } from '../../contexts/VolumeContext'
+import interviewerAudio from '../../audios/interviewer.mp3'
 
-function InterviewerQuestion({ bundle, assets, onNextChild, isParent, currentChildIndex }) {
+const InterviewerQuestion = forwardRef(function InterviewerQuestion({ bundle, assets, onNextChild, isParent, currentChildIndex, hasSeenIntro = false }, ref) {
   const { getVolumeDecimal } = useVolume()
   // State management
   const [isPlaying, setIsPlaying] = useState(false)
@@ -13,6 +14,7 @@ function InterviewerQuestion({ bundle, assets, onNextChild, isParent, currentChi
   const [showBanner, setShowBanner] = useState(false)
   const [showTimer, setShowTimer] = useState(false)
   const [parentCompleted, setParentCompleted] = useState(false)
+  const [showIntro, setShowIntro] = useState(() => isParent && !hasSeenIntro)
   
   // Refs
   const audioRef = useRef(null)
@@ -22,6 +24,7 @@ function InterviewerQuestion({ bundle, assets, onNextChild, isParent, currentChi
   const delayTimerRef = useRef(null)
   const handlersRef = useRef({ handleEnded: null, handleError: null })
   const hasAutoAdvancedRef = useRef(false)
+  const introAudioRef = useRef(null)
 
   // Get current display based on isParent
   // Use InterviewerQuestions instead of childQuestions
@@ -235,8 +238,9 @@ function InterviewerQuestion({ bundle, assets, onNextChild, isParent, currentChi
   }, [isParent, currentChildIndex])
 
   // Parent phase: show image, wait 2 seconds, play audio, wait 2 seconds, then auto-advance to first child
+  // Only start after intro is dismissed
   useEffect(() => {
-    if (isParent && bundle.audioAsset) {
+    if (isParent && bundle.audioAsset && !showIntro) {
       // Reset parent-specific state
       setParentCompleted(false)
       hasAutoAdvancedRef.current = false
@@ -334,7 +338,7 @@ function InterviewerQuestion({ bundle, assets, onNextChild, isParent, currentChi
         delayTimerRef.current = null
       }
     }
-  }, [isParent, bundle.audioAsset, onNextChild])
+  }, [isParent, bundle.audioAsset, onNextChild, showIntro])
 
   // Child phase: handle child question sequence
   useEffect(() => {
@@ -383,12 +387,144 @@ function InterviewerQuestion({ bundle, assets, onNextChild, isParent, currentChi
     return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
   }
 
+  // Reset intro state when isParent changes
+  useEffect(() => {
+    const shouldShowIntro = isParent && !hasSeenIntro
+    setShowIntro(shouldShowIntro)
+  }, [isParent, hasSeenIntro])
+
+  // Play audio on intro screen
+  useEffect(() => {
+    if (showIntro && isParent) {
+      const audio = new Audio(interviewerAudio)
+      audio.volume = getVolumeDecimal()
+      audio.loop = false
+      introAudioRef.current = audio
+
+      // Play audio after 1 second delay
+      const startTimer = setTimeout(() => {
+        if (introAudioRef.current) {
+          introAudioRef.current.play().catch(error => {
+            console.error('Error playing intro audio:', error)
+          })
+        }
+      }, 1000)
+
+      // Cleanup on unmount or when intro is dismissed
+      return () => {
+        clearTimeout(startTimer)
+        if (introAudioRef.current) {
+          introAudioRef.current.pause()
+          introAudioRef.current.currentTime = 0
+          introAudioRef.current = null
+        }
+      }
+    }
+  }, [showIntro, isParent, getVolumeDecimal])
+
+  // Update intro audio volume when volume changes
+  useEffect(() => {
+    if (showIntro && isParent && introAudioRef.current) {
+      introAudioRef.current.volume = getVolumeDecimal()
+    }
+  }, [showIntro, isParent, getVolumeDecimal])
+
+  // Expose method to dismiss intro
+  useImperativeHandle(ref, () => ({
+    dismissIntro: () => {
+      if (showIntro && isParent) {
+        setShowIntro(false)
+        // Stop intro audio when dismissing
+        if (introAudioRef.current) {
+          introAudioRef.current.pause()
+          introAudioRef.current.currentTime = 0
+          introAudioRef.current = null
+        }
+        return true // Return true if intro was dismissed
+      }
+      return false // Return false if no intro to dismiss
+    },
+    isShowingIntro: () => showIntro && isParent
+  }), [showIntro, isParent])
+
   // Get instruction text
   const getInstructionText = () => {
     if (isParent) {
       return bundle.content || ""
     }
     return "Please answer the interviewer's questions." // Child questions show this instruction
+  }
+
+  // Show intro screen for parent (title page)
+  if (showIntro && isParent) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-start',
+          justifyContent: 'flex-start',
+          minHeight: '100%',
+          padding: '64px 48px 48px 64px',
+          maxWidth: '900px',
+          margin: '0 auto',
+          width: '100%',
+        }}
+      >
+        {/* Title */}
+        <Typography
+          sx={{
+            fontSize: '32px',
+            fontWeight: 600,
+            color: '#424242',
+            marginBottom: '16px',
+            textAlign: 'left',
+          }}
+        >
+          Take an Interview
+        </Typography>
+
+        {/* Divider */}
+        <Divider
+          sx={{
+            width: '100%',
+            marginBottom: '32px',
+            borderColor: '#e0e0e0',
+          }}
+        />
+
+        {/* Instructions */}
+        <Box
+          sx={{
+            marginBottom: '32px',
+            textAlign: 'left',
+            maxWidth: '800px',
+          }}
+        >
+          <Typography
+            sx={{
+              fontSize: '16px',
+              fontWeight: 400,
+              color: '#000000',
+              lineHeight: 1.6,
+              marginBottom: '4px',
+            }}
+          >
+            An interviewer will ask you questions. Answer the questions and be sure to say as much as you can in the time allowed.
+          </Typography>
+          <Typography
+            sx={{
+              fontSize: '16px',
+              fontWeight: 400,
+              color: '#000000',
+              lineHeight: 1.6,
+            }}
+          >
+            No time for preparation will be provided.
+          </Typography>
+        </Box>
+      </Box>
+    )
   }
 
   return (
@@ -538,7 +674,7 @@ function InterviewerQuestion({ bundle, assets, onNextChild, isParent, currentChi
       </Modal>
     </Box>
   )
-}
+})
 
 export default InterviewerQuestion
 
