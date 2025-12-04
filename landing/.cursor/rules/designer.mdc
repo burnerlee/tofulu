@@ -1,0 +1,8 @@
+---
+alwaysApply: true
+---
+
+All the learnings for the system design of the project - color scheme, font style
+etc. should be documented in design.md
+
+This file should be referred while implementing any component.

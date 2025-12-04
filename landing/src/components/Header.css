@@ -1,0 +1,162 @@
+.header {
+  background-color: #ffffff;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  animation: fadeIn 0.6s ease-out;
+}
+
+.header-dashboard {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+}
+
+.header-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header-container-dashboard {
+  max-width: 100%;
+  padding: 0 24px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: #000000;
+  animation: fadeInUp 0.8s ease-out 0.1s both;
+}
+
+.logo-icon {
+  width: 32px;
+  height: 32px;
+  background-color: #086A6F;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.crescent {
+  width: 18px;
+  height: 18px;
+  background-color: #ffffff;
+  border-radius: 50%;
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.logo-text {
+  font-family: 'Oswald', sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: #000000;
+  letter-spacing: -0.01em;
+}
+
+.nav {
+  display: flex;
+  gap: 32px;
+  align-items: center;
+  animation: fadeInUp 0.8s ease-out 0.2s both;
+}
+
+.nav-link {
+  font-family: 'Inter', sans-serif;
+  color: #333333;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 400;
+  transition: color 0.2s ease;
+  letter-spacing: 0.01em;
+}
+
+.nav-link:hover {
+  color: #086A6F;
+}
+
+.download-link {
+  font-family: 'Inter', sans-serif;
+  color: #333333;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 400;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: color 0.2s ease;
+  letter-spacing: 0.01em;
+  animation: fadeInUp 0.8s ease-out 0.3s both;
+}
+
+.download-link:hover {
+  color: #086A6F;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.user-name {
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  color: #333333;
+  letter-spacing: 0.01em;
+}
+
+.logout-button {
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  color: #086A6F;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  letter-spacing: 0.01em;
+}
+
+.logout-button:hover {
+  color: #065559;
+  background-color: rgba(8, 106, 111, 0.05);
+}
+
+.arrow {
+  font-size: 18px;
+}
+
+@media (max-width: 768px) {
+  .nav {
+    display: none;
+  }
+  
+  .header-container {
+    padding: 0 16px;
+    height: 64px;
+  }
+
+  .header-container-dashboard {
+    padding: 0 16px;
+  }
+}
+

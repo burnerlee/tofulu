@@ -1,0 +1,12 @@
+---
+alwaysApply: true
+---
+Whenver making any change to the ui, take care of the following points:
+1. always navigate to the website using the browser tools provided and make sure the implemented ui is EXACT REPLICA of the reference design provided.
+2. the following must be taken care of:
+2.a. layout
+2.b. component sizes and arrangement
+2.c. Font size, style and color
+2.d. Box shadows
+2.e. any other css properties you can think of
+
