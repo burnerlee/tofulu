@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     # CORS
     ALLOWED_ORIGINS: List[str] = os.getenv(
         "ALLOWED_ORIGINS", 
-        "http://localhost:5173,http://localhost:3000"
+        "http://localhost:5173,http://localhost:3000,https://testino.space"
     ).split(",")
     
     # OTP Configuration
