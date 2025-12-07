@@ -24,6 +24,7 @@ class EmailService:
     
     def __init__(self):
         self.provider = settings.EMAIL_PROVIDER
+        logger.info(f"Email provider: {self.provider}")
         self._initialize_provider()
     
     def _initialize_provider(self) -> None:

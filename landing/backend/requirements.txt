@@ -5,6 +5,7 @@ pydantic==2.10.6
 pydantic-core==2.27.2
 pydantic-settings==2.1.0
 python-multipart==0.0.6
+pydantic[email]
 
 # Email providers (recommended for OTP)
 resend==1.0.0  # Recommended: Free tier 3,000/month, then $20/month for 50k
