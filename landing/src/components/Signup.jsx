@@ -1,13 +1,21 @@
-import React, { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import React, { useState, useEffect } from 'react'
+import { useNavigate, Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import './Signup.css'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
 
 function Signup() {
+  const location = useLocation()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
+  
+  // Pre-fill email if passed from login redirect
+  useEffect(() => {
+    if (location.state?.email) {
+      setEmail(location.state.email)
+    }
+  }, [location.state])
   const [otp, setOtp] = useState('')
   const [otpSent, setOtpSent] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -58,7 +66,15 @@ function Signup() {
         setSuccess('OTP sent successfully to your email address')
         setError('')
       } else {
-        setError(data.detail || 'Failed to send OTP. Please try again.')
+        // If user already exists (409 Conflict), redirect to login with email pre-filled
+        if (response.status === 409) {
+          setError('Account already exists. Redirecting to login...')
+          setTimeout(() => {
+            navigate('/login', { state: { email: email.toLowerCase().trim() } })
+          }, 2000)
+        } else {
+          setError(data.detail || 'Failed to send OTP. Please try again.')
+        }
       }
     } catch (err) {
       setError('Network error. Please check your connection and try again.')

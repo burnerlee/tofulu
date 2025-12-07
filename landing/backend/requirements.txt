@@ -1,7 +1,8 @@
 fastapi==0.104.1
 uvicorn[standard]==0.24.0
 python-dotenv==1.0.0
-pydantic==2.5.0
+pydantic==2.10.6
+pydantic-core==2.27.2
 pydantic-settings==2.1.0
 python-multipart==0.0.6
 
@@ -15,10 +16,10 @@ resend==1.0.0  # Recommended: Free tier 3,000/month, then $20/month for 50k
 # plivo==4.30.0
 # requests==2.31.0  # Required for MSG91
 
-# Optional: Database (uncomment as needed)
-# sqlalchemy==2.0.23
-# alembic==1.12.1
-# psycopg2-binary==2.9.9
+# Database
+sqlalchemy>=2.0.31  # Python 3.13 compatible
+# alembic==1.12.1  # Uncomment when needed for migrations
+# psycopg2-binary==2.9.9  # Uncomment for PostgreSQL
 
 # Optional: Redis (uncomment as needed)
 # redis==5.0.1

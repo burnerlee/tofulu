@@ -62,4 +62,12 @@ class ValidationError(TestinoException):
         super().__init__(message, status_code=400)
 
 
+class UserNotFoundError(TestinoException):
+    """Raised when user is not found."""
+    
+    def __init__(self, message: str = "User not found. Please sign up first."):
+        super().__init__(message, status_code=404)
+
+
+
 

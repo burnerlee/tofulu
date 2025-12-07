@@ -6,15 +6,19 @@ import './Dashboard.css'
 function Dashboard() {
   const { user } = useAuth()
 
-  // Test data - 1 unlocked, 4 locked
+  // Determine if user has premium access
+  const isPremium = user?.premium === true
+
+  // Test data - premium users see all 5 tests unlocked, non-premium see only first test
   const tests = [
     { id: 1, name: 'TOEFL Mock Test 1', unlocked: true },
-    { id: 2, name: 'TOEFL Mock Test 2', unlocked: false },
-    { id: 3, name: 'TOEFL Mock Test 3', unlocked: false },
-    { id: 4, name: 'TOEFL Mock Test 4', unlocked: false },
-    { id: 5, name: 'TOEFL Mock Test 5', unlocked: false },
+    { id: 2, name: 'TOEFL Mock Test 2', unlocked: isPremium },
+    { id: 3, name: 'TOEFL Mock Test 3', unlocked: isPremium },
+    { id: 4, name: 'TOEFL Mock Test 4', unlocked: isPremium },
+    { id: 5, name: 'TOEFL Mock Test 5', unlocked: isPremium },
   ]
 
+  // Use user's name if available, otherwise fallback to email username
   const userName = user?.name || user?.email?.split('@')[0] || 'there'
 
   return (

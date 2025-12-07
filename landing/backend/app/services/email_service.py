@@ -7,6 +7,14 @@ from typing import Optional
 from app.config import get_settings
 from app.core.exceptions import SMSException
 
+# Import boto3 exceptions for proper error handling
+try:
+    from botocore.exceptions import ClientError, BotoCoreError
+except ImportError:
+    # boto3 not installed, define dummy classes
+    ClientError = Exception
+    BotoCoreError = Exception
+
 logger = logging.getLogger(__name__)
 settings = get_settings()
 
@@ -31,6 +39,20 @@ class EmailService:
         elif self.provider == "aws_ses":
             try:
                 import boto3
+                
+                # Validate AWS credentials are provided
+                if not settings.AWS_ACCESS_KEY_ID or not settings.AWS_SECRET_ACCESS_KEY:
+                    logger.warning("AWS credentials not configured. Falling back to console.")
+                    logger.warning("Please set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY in your .env file")
+                    self.provider = "console"
+                    return
+                
+                if not settings.AWS_SES_FROM_EMAIL:
+                    logger.warning("AWS_SES_FROM_EMAIL not configured. Falling back to console.")
+                    logger.warning("Please set AWS_SES_FROM_EMAIL in your .env file")
+                    self.provider = "console"
+                    return
+                
                 self.ses_client = boto3.client(
                     'ses',
                     aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
@@ -38,8 +60,10 @@ class EmailService:
                     region_name=settings.AWS_REGION
                 )
                 self.ses_from_email = settings.AWS_SES_FROM_EMAIL
+                logger.info(f"AWS SES initialized with from email: {self.ses_from_email}, region: {settings.AWS_REGION}")
             except ImportError:
                 logger.warning("boto3 not installed. Falling back to console.")
+                logger.warning("Install boto3: pip install boto3")
                 self.provider = "console"
         elif self.provider == "sendgrid":
             try:
@@ -144,6 +168,17 @@ class EmailService:
     def _send_via_aws_ses(self, email: str, subject: str, message: str) -> bool:
         """Send email via AWS SES (very cheap at scale)."""
         try:
+            # Check if SES client is initialized
+            if not hasattr(self, 'ses_client') or self.ses_client is None:
+                raise SMSException(
+                    "AWS SES client not initialized. Please check your AWS credentials configuration."
+                )
+            
+            if not self.ses_from_email:
+                raise SMSException(
+                    "AWS_SES_FROM_EMAIL not configured. Please set it in your .env file."
+                )
+            
             response = self.ses_client.send_email(
                 Source=self.ses_from_email,
                 Destination={'ToAddresses': [email]},
@@ -156,11 +191,66 @@ class EmailService:
             )
             logger.info(f"Email sent via AWS SES to {email}, MessageId: {response['MessageId']}")
             return True
-        except Exception as e:
-            error_str = str(e)
-            logger.error(f"AWS SES error: {e}")
+        except ClientError as e:
+            # Handle boto3 ClientError specifically - this is the main exception type from AWS APIs
+            error_code = e.response.get('Error', {}).get('Code', 'Unknown')
+            error_message = e.response.get('Error', {}).get('Message', str(e))
             
-            # Check for common AWS SES errors and provide helpful messages
+            logger.error(f"AWS SES ClientError - Code: {error_code}, Message: {error_message}")
+            
+            if error_code == "MessageRejected":
+                if "not verified" in error_message.lower():
+                    raise SMSException(
+                        f"AWS SES is in sandbox mode. The email address '{email}' needs to be verified in AWS SES. "
+                        f"Please verify this email in the AWS SES console, or request production access to send to any email address. "
+                        f"See: https://console.aws.amazon.com/ses/home"
+                    )
+                elif "sandbox" in error_message.lower():
+                    raise SMSException(
+                        f"AWS SES is in sandbox mode. You can only send emails to verified addresses. "
+                        f"Please verify '{email}' in AWS SES console or request production access."
+                    )
+                else:
+                    raise SMSException(f"AWS SES message rejected: {error_message}")
+            elif error_code == "Throttling":
+                raise SMSException(
+                    f"AWS SES rate limit exceeded. Please wait a moment and try again."
+                )
+            elif error_code == "InvalidParameterValue":
+                raise SMSException(
+                    f"AWS SES invalid parameter: {error_message}. Please check your configuration."
+                )
+            elif error_code == "AccessDenied":
+                raise SMSException(
+                    f"AWS SES access denied. Please check your AWS credentials and IAM permissions. "
+                    f"Your IAM user needs 'ses:SendEmail' permission."
+                )
+            elif error_code == "InvalidAccessKeyId":
+                raise SMSException(
+                    f"AWS SES authentication failed: Invalid access key ID. Please check your AWS_ACCESS_KEY_ID."
+                )
+            elif error_code == "SignatureDoesNotMatch":
+                raise SMSException(
+                    f"AWS SES authentication failed: Signature mismatch. Please check your AWS_SECRET_ACCESS_KEY."
+                )
+            elif error_code == "InvalidClientTokenId":
+                raise SMSException(
+                    f"AWS SES authentication failed: Invalid client token. Please check your AWS credentials."
+                )
+            else:
+                raise SMSException(f"AWS SES error ({error_code}): {error_message}")
+        except BotoCoreError as e:
+            # Handle other boto3 core errors (network issues, etc.)
+            error_str = str(e)
+            logger.error(f"AWS SES BotoCoreError: {error_str}")
+            raise SMSException(f"AWS SES connection error: {error_str}. Please check your network connection and AWS configuration.")
+        except Exception as e:
+            # Handle any other unexpected errors
+            error_str = str(e)
+            error_type = type(e).__name__
+            logger.error(f"AWS SES unexpected error ({error_type}): {error_str}")
+            
+            # Fallback: Check for common error patterns in string representation
             if "MessageRejected" in error_str and "not verified" in error_str:
                 raise SMSException(
                     f"AWS SES is in sandbox mode. The email address '{email}' needs to be verified in AWS SES. "
@@ -175,6 +265,11 @@ class EmailService:
             elif "Throttling" in error_str or "Rate exceeded" in error_str:
                 raise SMSException(
                     f"AWS SES rate limit exceeded. Please wait a moment and try again."
+                )
+            elif "InvalidAccessKeyId" in error_str or "SignatureDoesNotMatch" in error_str:
+                raise SMSException(
+                    f"AWS SES authentication failed. Please check your AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY. "
+                    f"Error: {error_str}"
                 )
             else:
                 raise SMSException(f"AWS SES email failed: {error_str}")

@@ -1,8 +1,11 @@
 """
 Authentication route handlers.
 """
+import logging
 from fastapi import APIRouter, HTTPException, status, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+
+logger = logging.getLogger(__name__)
 from app.api.v1.schemas.auth import (
     SendEmailOTPRequest,
     SendEmailOTPResponse,
@@ -17,8 +20,11 @@ from app.core.exceptions import (
     TestinoException,
     ValidationError,
     OTPException,
-    SMSException
+    SMSException,
+    UserNotFoundError
 )
+from app.database import get_db
+from sqlalchemy.orm import Session
 from app.core.security import verify_token
 
 # Security scheme for Bearer token authentication
@@ -32,11 +38,15 @@ router = APIRouter(prefix="/auth", tags=["authentication"])
     response_model=SendEmailOTPResponse,
     status_code=status.HTTP_200_OK,
     summary="Send OTP to email",
-    description="Generate and send a 6-digit OTP to the provided email address."
+    description="Generate and send a 6-digit OTP to the provided email address. For login, checks if user exists first."
 )
-async def send_email_otp(request: SendEmailOTPRequest) -> SendEmailOTPResponse:
+async def send_email_otp(
+    request: SendEmailOTPRequest,
+    db: Session = Depends(get_db)
+) -> SendEmailOTPResponse:
     """
     Send OTP to the provided email address.
+    For login, checks if user exists before sending OTP.
     
     - **email**: Email address for login
     
@@ -44,11 +54,16 @@ async def send_email_otp(request: SendEmailOTPRequest) -> SendEmailOTPResponse:
     """
     try:
         auth_service = get_auth_service()
-        result = auth_service.send_email_otp(email=request.email)
+        result = auth_service.send_email_otp(email=request.email, db=db)
         return SendEmailOTPResponse(**result)
     except ValidationError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e.message)
+        )
+    except UserNotFoundError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
             detail=str(e.message)
         )
     except SMSException as e:
@@ -70,7 +85,10 @@ async def send_email_otp(request: SendEmailOTPRequest) -> SendEmailOTPResponse:
     summary="Verify email OTP",
     description="Verify the OTP provided by the user and return an access token."
 )
-async def verify_email_otp(request: VerifyEmailOTPRequest) -> VerifyEmailOTPResponse:
+async def verify_email_otp(
+    request: VerifyEmailOTPRequest,
+    db: Session = Depends(get_db)
+) -> VerifyEmailOTPResponse:
     """
     Verify OTP and generate access token.
     
@@ -83,7 +101,8 @@ async def verify_email_otp(request: VerifyEmailOTPRequest) -> VerifyEmailOTPResp
         auth_service = get_auth_service()
         result = auth_service.verify_email_otp(
             email=request.email,
-            otp=request.otp
+            otp=request.otp,
+            db=db
         )
         return VerifyEmailOTPResponse(**result)
     except ValidationError as e:
@@ -94,6 +113,11 @@ async def verify_email_otp(request: VerifyEmailOTPRequest) -> VerifyEmailOTPResp
     except OTPException as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e.message)
+        )
+    except UserNotFoundError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
             detail=str(e.message)
         )
     except Exception as e:
@@ -110,7 +134,10 @@ async def verify_email_otp(request: VerifyEmailOTPRequest) -> VerifyEmailOTPResp
     summary="Sign up with email",
     description="Create a new account and send verification OTP to email."
 )
-async def signup(request: SignupRequest) -> SignupResponse:
+async def signup(
+    request: SignupRequest,
+    db: Session = Depends(get_db)
+) -> SignupResponse:
     """
     Sign up a new user.
     
@@ -123,12 +150,19 @@ async def signup(request: SignupRequest) -> SignupResponse:
         auth_service = get_auth_service()
         result = auth_service.signup_with_email_otp(
             name=request.name,
-            email=request.email
+            email=request.email,
+            db=db
         )
         return SignupResponse(**result)
     except ValidationError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e.message)
+        )
+    except UserNotFoundError as e:
+        # User already exists - return 409 Conflict
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
             detail=str(e.message)
         )
     except SMSException as e:
@@ -137,6 +171,7 @@ async def signup(request: SignupRequest) -> SignupResponse:
             detail=str(e.message)
         )
     except Exception as e:
+        logger.error(f"Error in signup: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected error occurred"
@@ -150,7 +185,10 @@ async def signup(request: SignupRequest) -> SignupResponse:
     summary="Verify signup OTP",
     description="Verify the signup OTP and create user account."
 )
-async def verify_signup(request: VerifyEmailOTPRequest) -> VerifyEmailOTPResponse:
+async def verify_signup(
+    request: VerifyEmailOTPRequest,
+    db: Session = Depends(get_db)
+) -> VerifyEmailOTPResponse:
     """
     Verify signup OTP and create account.
     
@@ -170,7 +208,8 @@ async def verify_signup(request: VerifyEmailOTPRequest) -> VerifyEmailOTPRespons
         result = auth_service.verify_signup_otp(
             name=request.name,
             email=request.email,
-            otp=request.otp
+            otp=request.otp,
+            db=db
         )
         return VerifyEmailOTPResponse(**result)
     except ValidationError as e:
@@ -184,9 +223,10 @@ async def verify_signup(request: VerifyEmailOTPRequest) -> VerifyEmailOTPRespons
             detail=str(e.message)
         )
     except Exception as e:
+        logger.error(f"Error in verify_signup: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An unexpected error occurred"
+            detail=f"An unexpected error occurred: {str(e)}"
         )
 
 
@@ -223,14 +263,31 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     summary="Get current user",
     description="Get information about the currently authenticated user."
 )
-async def get_current_user_info(current_user: dict = Depends(get_current_user)) -> UserResponse:
+async def get_current_user_info(
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db)
+) -> UserResponse:
     """
     Get current user information from JWT token.
     
-    Returns user email and name from the authenticated token.
+    Returns user email, name, and premium status from the authenticated token.
     """
+    # Get user from database to ensure we have the latest data
+    user_email = current_user.get("sub") or current_user.get("email")
+    if user_email:
+        from app.models.user import User
+        user = db.query(User).filter(User.email == user_email).first()
+        if user:
+            return UserResponse(
+                email=user.email,
+                name=user.name,
+                premium=user.premium
+            )
+    
+    # Fallback to token data if user not found in DB
     return UserResponse(
         email=current_user.get("email", current_user.get("sub", "")),
-        name=current_user.get("name")
+        name=current_user.get("name"),
+        premium=current_user.get("premium", False)
     )
 

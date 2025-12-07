@@ -21,10 +21,10 @@ class Settings(BaseSettings):
     PORT: int = int(os.getenv("PORT", 8000))
     
     # CORS
-    ALLOWED_ORIGINS: List[str] = os.getenv(
+    ALLOWED_ORIGINS: str = os.getenv(
         "ALLOWED_ORIGINS", 
         "http://localhost:5173,http://localhost:3000,https://testino.space"
-    ).split(",")
+    )
     
     # OTP Configuration
     OTP_LENGTH: int = 6

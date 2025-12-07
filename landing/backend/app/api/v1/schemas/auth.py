@@ -100,6 +100,7 @@ class SignupResponse(BaseModel):
 class UserResponse(BaseModel):
     """Response schema for user information."""
     
-    email: str = Field(..., description="User's email address")
+    email: str = Field(..., description="User's email address (primary key)")
     name: Optional[str] = Field(None, description="User's name")
+    premium: bool = Field(False, description="Whether user has premium access")
 

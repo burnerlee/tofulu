@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import get_settings
 from app.api.v1.routes import auth, health
+from app.database import init_db
 
 # Configure logging
 logging.basicConfig(
@@ -30,7 +31,7 @@ app = FastAPI(
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.ALLOWED_ORIGINS,
+    allow_origins=settings.ALLOWED_ORIGINS.split(","),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -57,7 +58,10 @@ async def startup_event():
     """Application startup event."""
     logger.info(f"Starting {settings.APP_NAME} v{settings.APP_VERSION}")
     logger.info(f"Debug mode: {settings.DEBUG}")
-    logger.info(f"CORS allowed origins: {settings.ALLOWED_ORIGINS}")
+    logger.info(f"CORS allowed origins: {settings.ALLOWED_ORIGINS.split(',')}")
+    # Initialize database tables
+    init_db()
+    logger.info("Database initialized")
 
 
 @app.on_event("shutdown")
@@ -75,6 +79,7 @@ if __name__ == "__main__":
         reload=settings.DEBUG,
         log_level="info"
     )
+
 
 
 

@@ -1,11 +1,12 @@
-import React, { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import React, { useState, useEffect } from 'react'
+import { useNavigate, Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import './Login.css'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
 
 function Login() {
+  const location = useLocation()
   const [email, setEmail] = useState('')
   const [otp, setOtp] = useState('')
   const [otpSent, setOtpSent] = useState(false)
@@ -51,7 +52,15 @@ function Login() {
         setSuccess('Verification code sent successfully to your email')
         setError('')
       } else {
-        setError(data.detail || 'Failed to send verification code. Please try again.')
+        // If user not found (404), redirect to signup
+        if (response.status === 404) {
+          setError('Account not found. Redirecting to sign up...')
+          setTimeout(() => {
+            navigate('/signup', { state: { email: email } })
+          }, 2000)
+        } else {
+          setError(data.detail || 'Failed to send verification code. Please try again.')
+        }
       }
     } catch (err) {
       setError('Network error. Please check your connection and try again.')
@@ -60,6 +69,23 @@ function Login() {
       setLoading(false)
     }
   }
+
+  // Pre-fill email if passed from signup redirect and auto-submit
+  useEffect(() => {
+    if (location.state?.email && !otpSent && !loading) {
+      const prefillEmail = location.state.email
+      setEmail(prefillEmail)
+      // Auto-submit after email is set
+      const timer = setTimeout(() => {
+        // Validate and send OTP automatically
+        if (prefillEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(prefillEmail)) {
+          handleSendOTP({ preventDefault: () => {} })
+        }
+      }, 300)
+      return () => clearTimeout(timer)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.state])
 
   const handleVerifyOTP = async (e) => {
     e.preventDefault()
@@ -140,6 +166,7 @@ function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                autoFocus={!!location.state?.email}
               />
             </div>
 
