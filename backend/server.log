@@ -1,0 +1,801 @@
+INFO:     Will watch for changes in these directories: ['/Users/burnerlee/Projects/personal/tofulu/landing/backend']
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [6654] using StatReload
+INFO:     Started server process [6657]
+INFO:     Waiting for application startup.
+2025-12-05 02:28:20,419 - app.main - INFO - Starting Testino Backend API v1.0.0
+2025-12-05 02:28:20,419 - app.main - INFO - Debug mode: False
+2025-12-05 02:28:20,419 - app.main - INFO - CORS allowed origins: ['http://localhost:5173', 'http://localhost:3000']
+INFO:     Application startup complete.
+INFO:     127.0.0.1:58992 - "GET /api/v1/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59005 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59226 - "OPTIONS /api/v1/auth/signup HTTP/1.1" 200 OK
+2025-12-05 02:28:55,666 - app.services.otp_service - INFO - OTP generated for avi.aviral140@gmail.com (expires in 300s)
+2025-12-05 02:28:56,647 - app.services.email_service - ERROR - AWS SES error: An error occurred (MessageRejected) when calling the SendEmail operation: Email address is not verified. The following identities failed the check in region US-EAST-1: avi.aviral140@gmail.com
+2025-12-05 02:28:56,647 - app.services.email_service - ERROR - Error sending email: AWS SES email failed: An error occurred (MessageRejected) when calling the SendEmail operation: Email address is not verified. The following identities failed the check in region US-EAST-1: avi.aviral140@gmail.com
+2025-12-05 02:28:56,647 - app.services.otp_service - INFO - OTP deleted for avi.aviral140@gmail.com
+INFO:     127.0.0.1:59226 - "POST /api/v1/auth/signup HTTP/1.1" 500 Internal Server Error
+WARNING:  StatReload detected changes in 'app/services/email_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+2025-12-05 02:30:02,010 - app.main - INFO - Shutting down Testino Backend API
+INFO:     Application shutdown complete.
+INFO:     Finished server process [6657]
+INFO:     Started server process [6938]
+INFO:     Waiting for application startup.
+2025-12-05 02:30:02,306 - app.main - INFO - Starting Testino Backend API v1.0.0
+2025-12-05 02:30:02,306 - app.main - INFO - Debug mode: False
+2025-12-05 02:30:02,306 - app.main - INFO - CORS allowed origins: ['http://localhost:5173', 'http://localhost:3000']
+INFO:     Application startup complete.
+WARNING:  StatReload detected changes in 'app/services/email_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+2025-12-05 02:30:33,625 - app.main - INFO - Shutting down Testino Backend API
+INFO:     Application shutdown complete.
+INFO:     Finished server process [6938]
+INFO:     Started server process [7059]
+INFO:     Waiting for application startup.
+2025-12-05 02:30:33,882 - app.main - INFO - Starting Testino Backend API v1.0.0
+2025-12-05 02:30:33,882 - app.main - INFO - Debug mode: False
+2025-12-05 02:30:33,882 - app.main - INFO - CORS allowed origins: ['http://localhost:5173', 'http://localhost:3000']
+INFO:     Application startup complete.
+2025-12-05 02:31:21,549 - app.services.otp_service - INFO - OTP generated for avi.aviral140@gmail.com (expires in 300s)
+2025-12-05 02:31:22,452 - app.services.email_service - ERROR - AWS SES error: An error occurred (MessageRejected) when calling the SendEmail operation: Email address is not verified. The following identities failed the check in region US-EAST-1: avi.aviral140@gmail.com
+2025-12-05 02:31:22,452 - app.services.email_service - ERROR - Error sending email: AWS SES is in sandbox mode. The email address 'avi.aviral140@gmail.com' needs to be verified in AWS SES. Please verify this email in the AWS SES console, or request production access to send to any email address. See: https://console.aws.amazon.com/ses/home
+2025-12-05 02:31:22,452 - app.services.otp_service - INFO - OTP deleted for avi.aviral140@gmail.com
+INFO:     127.0.0.1:60164 - "POST /api/v1/auth/signup HTTP/1.1" 500 Internal Server Error
+2025-12-05 02:31:30,207 - app.services.otp_service - INFO - OTP generated for avi.aviral140@gmail.com (expires in 300s)
+2025-12-05 02:31:30,534 - app.services.email_service - ERROR - AWS SES error: An error occurred (MessageRejected) when calling the SendEmail operation: Email address is not verified. The following identities failed the check in region US-EAST-1: avi.aviral140@gmail.com
+2025-12-05 02:31:30,534 - app.services.email_service - ERROR - Error sending email: AWS SES is in sandbox mode. The email address 'avi.aviral140@gmail.com' needs to be verified in AWS SES. Please verify this email in the AWS SES console, or request production access to send to any email address. See: https://console.aws.amazon.com/ses/home
+2025-12-05 02:31:30,534 - app.services.otp_service - INFO - OTP deleted for avi.aviral140@gmail.com
+INFO:     127.0.0.1:60207 - "POST /api/v1/auth/signup HTTP/1.1" 500 Internal Server Error
+2025-12-05 02:31:53,882 - app.services.otp_service - INFO - OTP generated for avi.aviral140@gmail.com (expires in 300s)
+2025-12-05 02:31:54,217 - app.services.email_service - ERROR - AWS SES error: An error occurred (MessageRejected) when calling the SendEmail operation: Email address is not verified. The following identities failed the check in region US-EAST-1: avi.aviral140@gmail.com
+2025-12-05 02:31:54,217 - app.services.email_service - ERROR - Error sending email: AWS SES is in sandbox mode. The email address 'avi.aviral140@gmail.com' needs to be verified in AWS SES. Please verify this email in the AWS SES console, or request production access to send to any email address. See: https://console.aws.amazon.com/ses/home
+2025-12-05 02:31:54,217 - app.services.otp_service - INFO - OTP deleted for avi.aviral140@gmail.com
+INFO:     127.0.0.1:60467 - "POST /api/v1/auth/signup HTTP/1.1" 500 Internal Server Error
+2025-12-05 02:32:01,301 - app.services.otp_service - INFO - OTP generated for avi.aviral140@gmail.com (expires in 300s)
+2025-12-05 02:32:01,647 - app.services.email_service - ERROR - AWS SES error: An error occurred (MessageRejected) when calling the SendEmail operation: Email address is not verified. The following identities failed the check in region US-EAST-1: avi.aviral140@gmail.com
+2025-12-05 02:32:01,647 - app.services.email_service - ERROR - Error sending email: AWS SES is in sandbox mode. The email address 'avi.aviral140@gmail.com' needs to be verified in AWS SES. Please verify this email in the AWS SES console, or request production access to send to any email address. See: https://console.aws.amazon.com/ses/home
+2025-12-05 02:32:01,647 - app.services.otp_service - INFO - OTP deleted for avi.aviral140@gmail.com
+INFO:     127.0.0.1:60530 - "POST /api/v1/auth/signup HTTP/1.1" 500 Internal Server Error
+INFO:     127.0.0.1:64263 - "OPTIONS /api/v1/auth/signup HTTP/1.1" 200 OK
+2025-12-05 02:43:44,077 - app.services.otp_service - INFO - OTP generated for avi.aviral140@gmail.com (expires in 300s)
+2025-12-05 02:43:45,127 - app.services.email_service - ERROR - AWS SES error: An error occurred (MessageRejected) when calling the SendEmail operation: Email address is not verified. The following identities failed the check in region US-EAST-1: avi.aviral140@gmail.com
+2025-12-05 02:43:45,127 - app.services.email_service - ERROR - Error sending email: AWS SES is in sandbox mode. The email address 'avi.aviral140@gmail.com' needs to be verified in AWS SES. Please verify this email in the AWS SES console, or request production access to send to any email address. See: https://console.aws.amazon.com/ses/home
+2025-12-05 02:43:45,127 - app.services.otp_service - INFO - OTP deleted for avi.aviral140@gmail.com
+INFO:     127.0.0.1:64263 - "POST /api/v1/auth/signup HTTP/1.1" 500 Internal Server Error
+2025-12-05 02:44:24,341 - app.services.otp_service - INFO - OTP generated for avi.aviral140@gmail.com (expires in 300s)
+2025-12-05 02:44:24,769 - app.services.email_service - INFO - Email sent via AWS SES to avi.aviral140@gmail.com, MessageId: 0100019aeb375990-b8bcfad9-8ae9-4cc3-8344-5f75f2b7cbdd-000000
+2025-12-05 02:44:24,769 - app.services.auth_service - INFO - Signup OTP sent successfully to avi.aviral140@gmail.com
+INFO:     127.0.0.1:64484 - "POST /api/v1/auth/signup HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64869 - "OPTIONS /api/v1/auth/verify-signup HTTP/1.1" 200 OK
+2025-12-05 02:45:22,356 - app.services.otp_service - INFO - OTP verified successfully for avi.aviral140@gmail.com
+2025-12-05 02:45:22,356 - app.services.auth_service - INFO - Signup verified successfully for avi.aviral140@gmail.com (name: test)
+INFO:     127.0.0.1:64869 - "POST /api/v1/auth/verify-signup HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65337 - "OPTIONS /api/v1/auth/send-email-otp HTTP/1.1" 200 OK
+2025-12-05 02:46:21,112 - app.services.otp_service - INFO - OTP generated for avi.aviral140@gmail.com (expires in 300s)
+2025-12-05 02:46:22,097 - app.services.email_service - INFO - Email sent via AWS SES to avi.aviral140@gmail.com, MessageId: 0100019aeb3923e4-adeb430e-db25-40e0-bcbc-e043e0e07fd9-000000
+2025-12-05 02:46:22,097 - app.services.auth_service - INFO - OTP sent successfully to avi.aviral140@gmail.com
+INFO:     127.0.0.1:65337 - "POST /api/v1/auth/send-email-otp HTTP/1.1" 200 OK
+WARNING:  StatReload detected changes in 'app/core/security.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+2025-12-05 02:46:42,402 - app.main - INFO - Shutting down Testino Backend API
+INFO:     Application shutdown complete.
+INFO:     Finished server process [7059]
+Process SpawnProcess-4:
+Traceback (most recent call last):
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/multiprocessing/process.py", line 313, in _bootstrap
+    self.run()
+    ~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+    ~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/server.py", line 67, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/runners.py", line 195, in run
+    return runner.run(main)
+           ~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/base_events.py", line 719, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/server.py", line 71, in serve
+    await self._serve(sockets)
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/server.py", line 78, in _serve
+    config.load()
+    ~~~~~~~~~~~^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/config.py", line 439, in load
+    self.loaded_app = import_from_string(self.app)
+                      ~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/importer.py", line 22, in import_from_string
+    raise exc from None
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 1026, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/main.py", line 8, in <module>
+    from app.api.v1.routes import auth, health
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/api/v1/routes/auth.py", line 13, in <module>
+    from app.services.auth_service import get_auth_service
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/services/auth_service.py", line 6, in <module>
+    from app.services.otp_service import get_otp_service
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/services/otp_service.py", line 8, in <module>
+    from app.core.security import generate_otp
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/core/security.py", line 7, in <module>
+    from jose import JWTError, jwt
+ModuleNotFoundError: No module named 'jose'
+WARNING:  StatReload detected changes in 'app/services/auth_service.py'. Reloading...
+Process SpawnProcess-5:
+Traceback (most recent call last):
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/multiprocessing/process.py", line 313, in _bootstrap
+    self.run()
+    ~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+    ~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/server.py", line 67, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/runners.py", line 195, in run
+    return runner.run(main)
+           ~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/base_events.py", line 719, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/server.py", line 71, in serve
+    await self._serve(sockets)
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/server.py", line 78, in _serve
+    config.load()
+    ~~~~~~~~~~~^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/config.py", line 439, in load
+    self.loaded_app = import_from_string(self.app)
+                      ~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/importer.py", line 22, in import_from_string
+    raise exc from None
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 1026, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/main.py", line 8, in <module>
+    from app.api.v1.routes import auth, health
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/api/v1/routes/auth.py", line 13, in <module>
+    from app.services.auth_service import get_auth_service
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/services/auth_service.py", line 6, in <module>
+    from app.services.otp_service import get_otp_service
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/services/otp_service.py", line 8, in <module>
+    from app.core.security import generate_otp
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/core/security.py", line 7, in <module>
+    from jose import JWTError, jwt
+ModuleNotFoundError: No module named 'jose'
+WARNING:  StatReload detected changes in 'app/services/auth_service.py'. Reloading...
+Process SpawnProcess-6:
+Traceback (most recent call last):
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/multiprocessing/process.py", line 313, in _bootstrap
+    self.run()
+    ~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+    ~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/server.py", line 67, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/runners.py", line 195, in run
+    return runner.run(main)
+           ~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/base_events.py", line 719, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/server.py", line 71, in serve
+    await self._serve(sockets)
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/server.py", line 78, in _serve
+    config.load()
+    ~~~~~~~~~~~^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/config.py", line 439, in load
+    self.loaded_app = import_from_string(self.app)
+                      ~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/importer.py", line 22, in import_from_string
+    raise exc from None
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 1026, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/main.py", line 8, in <module>
+    from app.api.v1.routes import auth, health
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/api/v1/routes/auth.py", line 13, in <module>
+    from app.services.auth_service import get_auth_service
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/services/auth_service.py", line 6, in <module>
+    from app.services.otp_service import get_otp_service
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/services/otp_service.py", line 8, in <module>
+    from app.core.security import generate_otp
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/core/security.py", line 7, in <module>
+    from jose import JWTError, jwt
+ModuleNotFoundError: No module named 'jose'
+WARNING:  StatReload detected changes in 'app/services/auth_service.py'. Reloading...
+Process SpawnProcess-7:
+Traceback (most recent call last):
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/multiprocessing/process.py", line 313, in _bootstrap
+    self.run()
+    ~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+    ~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/server.py", line 67, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/runners.py", line 195, in run
+    return runner.run(main)
+           ~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/base_events.py", line 719, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/server.py", line 71, in serve
+    await self._serve(sockets)
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/server.py", line 78, in _serve
+    config.load()
+    ~~~~~~~~~~~^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/config.py", line 439, in load
+    self.loaded_app = import_from_string(self.app)
+                      ~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/importer.py", line 22, in import_from_string
+    raise exc from None
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 1026, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/main.py", line 8, in <module>
+    from app.api.v1.routes import auth, health
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/api/v1/routes/auth.py", line 13, in <module>
+    from app.services.auth_service import get_auth_service
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/services/auth_service.py", line 6, in <module>
+    from app.services.otp_service import get_otp_service
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/services/otp_service.py", line 8, in <module>
+    from app.core.security import generate_otp
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/core/security.py", line 7, in <module>
+    from jose import JWTError, jwt
+ModuleNotFoundError: No module named 'jose'
+WARNING:  StatReload detected changes in 'app/api/v1/schemas/auth.py'. Reloading...
+Process SpawnProcess-8:
+Traceback (most recent call last):
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/multiprocessing/process.py", line 313, in _bootstrap
+    self.run()
+    ~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+    ~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/server.py", line 67, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/runners.py", line 195, in run
+    return runner.run(main)
+           ~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/base_events.py", line 719, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/server.py", line 71, in serve
+    await self._serve(sockets)
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/server.py", line 78, in _serve
+    config.load()
+    ~~~~~~~~~~~^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/config.py", line 439, in load
+    self.loaded_app = import_from_string(self.app)
+                      ~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/importer.py", line 22, in import_from_string
+    raise exc from None
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 1026, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/main.py", line 8, in <module>
+    from app.api.v1.routes import auth, health
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/api/v1/routes/auth.py", line 13, in <module>
+    from app.services.auth_service import get_auth_service
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/services/auth_service.py", line 6, in <module>
+    from app.services.otp_service import get_otp_service
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/services/otp_service.py", line 8, in <module>
+    from app.core.security import generate_otp
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/core/security.py", line 7, in <module>
+    from jose import JWTError, jwt
+ModuleNotFoundError: No module named 'jose'
+WARNING:  StatReload detected changes in 'app/api/v1/routes/auth.py'. Reloading...
+Process SpawnProcess-9:
+Traceback (most recent call last):
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/multiprocessing/process.py", line 313, in _bootstrap
+    self.run()
+    ~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+    ~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/server.py", line 67, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/runners.py", line 195, in run
+    return runner.run(main)
+           ~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/base_events.py", line 719, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/server.py", line 71, in serve
+    await self._serve(sockets)
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/server.py", line 78, in _serve
+    config.load()
+    ~~~~~~~~~~~^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/config.py", line 439, in load
+    self.loaded_app = import_from_string(self.app)
+                      ~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/importer.py", line 22, in import_from_string
+    raise exc from None
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 1026, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/main.py", line 8, in <module>
+    from app.api.v1.routes import auth, health
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/api/v1/routes/auth.py", line 13, in <module>
+    from app.services.auth_service import get_auth_service
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/services/auth_service.py", line 6, in <module>
+    from app.services.otp_service import get_otp_service
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/services/otp_service.py", line 8, in <module>
+    from app.core.security import generate_otp
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/core/security.py", line 7, in <module>
+    from jose import JWTError, jwt
+ModuleNotFoundError: No module named 'jose'
+WARNING:  StatReload detected changes in 'app/api/v1/schemas/auth.py'. Reloading...
+Process SpawnProcess-10:
+Traceback (most recent call last):
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/multiprocessing/process.py", line 313, in _bootstrap
+    self.run()
+    ~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+    ~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/server.py", line 67, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/runners.py", line 195, in run
+    return runner.run(main)
+           ~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/base_events.py", line 719, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/server.py", line 71, in serve
+    await self._serve(sockets)
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/server.py", line 78, in _serve
+    config.load()
+    ~~~~~~~~~~~^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/config.py", line 439, in load
+    self.loaded_app = import_from_string(self.app)
+                      ~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/importer.py", line 22, in import_from_string
+    raise exc from None
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 1026, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/main.py", line 8, in <module>
+    from app.api.v1.routes import auth, health
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/api/v1/routes/auth.py", line 13, in <module>
+    from app.services.auth_service import get_auth_service
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/services/auth_service.py", line 6, in <module>
+    from app.services.otp_service import get_otp_service
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/services/otp_service.py", line 8, in <module>
+    from app.core.security import generate_otp
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/core/security.py", line 7, in <module>
+    from jose import JWTError, jwt
+ModuleNotFoundError: No module named 'jose'
+WARNING:  StatReload detected changes in 'app/services/email_service.py'. Reloading...
+Process SpawnProcess-11:
+Traceback (most recent call last):
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/multiprocessing/process.py", line 313, in _bootstrap
+    self.run()
+    ~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+    ~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/server.py", line 67, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/runners.py", line 195, in run
+    return runner.run(main)
+           ~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/base_events.py", line 719, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/server.py", line 71, in serve
+    await self._serve(sockets)
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/server.py", line 78, in _serve
+    config.load()
+    ~~~~~~~~~~~^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/config.py", line 439, in load
+    self.loaded_app = import_from_string(self.app)
+                      ~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/importer.py", line 22, in import_from_string
+    raise exc from None
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 1026, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/main.py", line 8, in <module>
+    from app.api.v1.routes import auth, health
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/api/v1/routes/auth.py", line 13, in <module>
+    from app.services.auth_service import get_auth_service
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/services/auth_service.py", line 6, in <module>
+    from app.services.otp_service import get_otp_service
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/services/otp_service.py", line 8, in <module>
+    from app.core.security import generate_otp
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/core/security.py", line 7, in <module>
+    from jose import JWTError, jwt
+ModuleNotFoundError: No module named 'jose'
+WARNING:  StatReload detected changes in 'app/services/email_service.py'. Reloading...
+Process SpawnProcess-12:
+Traceback (most recent call last):
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/multiprocessing/process.py", line 313, in _bootstrap
+    self.run()
+    ~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+    ~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/server.py", line 67, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/runners.py", line 195, in run
+    return runner.run(main)
+           ~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/base_events.py", line 719, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/server.py", line 71, in serve
+    await self._serve(sockets)
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/server.py", line 78, in _serve
+    config.load()
+    ~~~~~~~~~~~^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/config.py", line 439, in load
+    self.loaded_app = import_from_string(self.app)
+                      ~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/importer.py", line 22, in import_from_string
+    raise exc from None
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 1026, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/main.py", line 8, in <module>
+    from app.api.v1.routes import auth, health
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/api/v1/routes/auth.py", line 13, in <module>
+    from app.services.auth_service import get_auth_service
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/services/auth_service.py", line 6, in <module>
+    from app.services.otp_service import get_otp_service
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/services/otp_service.py", line 8, in <module>
+    from app.core.security import generate_otp
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/core/security.py", line 7, in <module>
+    from jose import JWTError, jwt
+ModuleNotFoundError: No module named 'jose'
+WARNING:  StatReload detected changes in 'app/services/auth_service.py'. Reloading...
+Process SpawnProcess-13:
+Traceback (most recent call last):
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/multiprocessing/process.py", line 313, in _bootstrap
+    self.run()
+    ~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+    ~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/server.py", line 67, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/runners.py", line 195, in run
+    return runner.run(main)
+           ~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/base_events.py", line 719, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/server.py", line 71, in serve
+    await self._serve(sockets)
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/server.py", line 78, in _serve
+    config.load()
+    ~~~~~~~~~~~^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/config.py", line 439, in load
+    self.loaded_app = import_from_string(self.app)
+                      ~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/importer.py", line 22, in import_from_string
+    raise exc from None
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 1026, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/main.py", line 8, in <module>
+    from app.api.v1.routes import auth, health
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/api/v1/routes/auth.py", line 13, in <module>
+    from app.services.auth_service import get_auth_service
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/services/auth_service.py", line 6, in <module>
+    from app.services.otp_service import get_otp_service
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/services/otp_service.py", line 8, in <module>
+    from app.core.security import generate_otp
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/core/security.py", line 7, in <module>
+    from jose import JWTError, jwt
+ModuleNotFoundError: No module named 'jose'
+WARNING:  StatReload detected changes in 'app/services/auth_service.py'. Reloading...
+Process SpawnProcess-14:
+Traceback (most recent call last):
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/multiprocessing/process.py", line 313, in _bootstrap
+    self.run()
+    ~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+    ~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/server.py", line 67, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/runners.py", line 195, in run
+    return runner.run(main)
+           ~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/base_events.py", line 719, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/server.py", line 71, in serve
+    await self._serve(sockets)
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/server.py", line 78, in _serve
+    config.load()
+    ~~~~~~~~~~~^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/config.py", line 439, in load
+    self.loaded_app = import_from_string(self.app)
+                      ~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/importer.py", line 22, in import_from_string
+    raise exc from None
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 1026, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/main.py", line 8, in <module>
+    from app.api.v1.routes import auth, health
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/api/v1/routes/auth.py", line 13, in <module>
+    from app.services.auth_service import get_auth_service
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/services/auth_service.py", line 6, in <module>
+    from app.services.otp_service import get_otp_service
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/services/otp_service.py", line 8, in <module>
+    from app.core.security import generate_otp
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/core/security.py", line 7, in <module>
+    from jose import JWTError, jwt
+ModuleNotFoundError: No module named 'jose'
+WARNING:  StatReload detected changes in 'app/services/auth_service.py'. Reloading...
+Process SpawnProcess-15:
+Traceback (most recent call last):
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/multiprocessing/process.py", line 313, in _bootstrap
+    self.run()
+    ~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+    ~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/server.py", line 67, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/runners.py", line 195, in run
+    return runner.run(main)
+           ~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/base_events.py", line 719, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/server.py", line 71, in serve
+    await self._serve(sockets)
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/server.py", line 78, in _serve
+    config.load()
+    ~~~~~~~~~~~^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/config.py", line 439, in load
+    self.loaded_app = import_from_string(self.app)
+                      ~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/importer.py", line 22, in import_from_string
+    raise exc from None
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 1026, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/main.py", line 8, in <module>
+    from app.api.v1.routes import auth, health
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/api/v1/routes/auth.py", line 13, in <module>
+    from app.services.auth_service import get_auth_service
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/services/auth_service.py", line 6, in <module>
+    from app.services.otp_service import get_otp_service
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/services/otp_service.py", line 8, in <module>
+    from app.core.security import generate_otp
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/core/security.py", line 7, in <module>
+    from jose import JWTError, jwt
+ModuleNotFoundError: No module named 'jose'
+WARNING:  StatReload detected changes in 'main.py'. Reloading...
+Process SpawnProcess-16:
+Traceback (most recent call last):
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/multiprocessing/process.py", line 313, in _bootstrap
+    self.run()
+    ~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+    ~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/server.py", line 67, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/runners.py", line 195, in run
+    return runner.run(main)
+           ~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/base_events.py", line 719, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/server.py", line 71, in serve
+    await self._serve(sockets)
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/server.py", line 78, in _serve
+    config.load()
+    ~~~~~~~~~~~^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/config.py", line 439, in load
+    self.loaded_app = import_from_string(self.app)
+                      ~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/importer.py", line 22, in import_from_string
+    raise exc from None
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/venv/lib/python3.13/site-packages/uvicorn/importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+  File "/opt/homebrew/Cellar/python@3.13/3.13.3_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 1026, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/main.py", line 8, in <module>
+    from app.api.v1.routes import auth, health
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/api/v1/routes/auth.py", line 13, in <module>
+    from app.services.auth_service import get_auth_service
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/services/auth_service.py", line 6, in <module>
+    from app.services.otp_service import get_otp_service
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/services/otp_service.py", line 8, in <module>
+    from app.core.security import generate_otp
+  File "/Users/burnerlee/Projects/personal/tofulu/landing/backend/app/core/security.py", line 7, in <module>
+    from jose import JWTError, jwt
+ModuleNotFoundError: No module named 'jose'
+INFO:     Stopping reloader process [6654]

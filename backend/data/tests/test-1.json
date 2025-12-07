@@ -1,5 +1,7 @@
 {
-  "testName": "TOEFL Practice Test",
+  "testName": "TOEFL Practice Test 1",
+  "testId": "test-1",
+  "test_authorization": "standard",
   "assets": {
     "female-character-image": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=600&fit=crop&crop=face",
     "male-character-image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=600&fit=crop&crop=face",

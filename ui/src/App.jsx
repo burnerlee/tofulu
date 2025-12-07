@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
-import { Box, Typography, Button } from '@mui/material'
+import { Box, Typography, Button, CircularProgress, Alert } from '@mui/material'
 import { VolumeProvider } from './contexts/VolumeContext'
 import WelcomePage from './components/WelcomePage'
 import HardwareCheck from './components/HardwareCheck'
@@ -13,7 +13,9 @@ import SectionIntro from './components/SectionIntro'
 import SectionEnd from './components/SectionEnd'
 import ModuleStart from './components/ModuleStart'
 import ModuleEnd from './components/ModuleEnd'
-import testData from './data/testData.json'
+
+// Backend API base URL
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
 
 const theme = createTheme({
   palette: {
@@ -28,10 +30,129 @@ const theme = createTheme({
 })
 
 function App() {
-  const [currentView, setCurrentView] = useState('welcome')
+  const [currentView, setCurrentView] = useState('loading')
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0)
   const [currentModuleIndex, setCurrentModuleIndex] = useState(0)
   const [userAnswers, setUserAnswers] = useState({})
+  const [testData, setTestData] = useState(null)
+  const [loadingError, setLoadingError] = useState(null)
+
+  // Get test ID and token from URL query parameters
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const testId = urlParams.get('test')
+    const tokenFromUrl = urlParams.get('token')
+
+    // Clean up URL by removing both token and test ID after reading them
+    const newParams = new URLSearchParams(window.location.search)
+    let urlChanged = false
+
+    // If token is provided in URL, store it in localStorage (platform's own localStorage)
+    if (tokenFromUrl) {
+      // Store token in platform's localStorage
+      localStorage.setItem('auth_token', tokenFromUrl)
+      console.log('Token stored in platform localStorage')
+      newParams.delete('token')
+      urlChanged = true
+    }
+
+    // Remove test ID from URL after reading it
+    if (testId) {
+      newParams.delete('test')
+      urlChanged = true
+    }
+
+    // Update URL to remove token and test ID (using replaceState so it doesn't add to history)
+    if (urlChanged) {
+      const newUrl = newParams.toString() 
+        ? `${window.location.pathname}?${newParams.toString()}`
+        : window.location.pathname
+      window.history.replaceState({}, '', newUrl)
+    }
+
+    if (testId) {
+      // Fetch test data from backend (will use token from localStorage)
+      fetchTestData(parseInt(testId))
+    } else {
+      // No test ID provided - test must be accessed from dashboard
+      setLoadingError('No test specified. Please start a test from the dashboard.')
+    }
+  }, [])
+
+  // Add reload warning when test is in progress
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      // Only show warning if test has started (not on welcome/loading screen)
+      // Check if user has made progress or is past the welcome screen
+      const testInProgress = 
+        currentView !== 'loading' && 
+        currentView !== 'welcome' && 
+        currentView !== 'complete' &&
+        testData !== null
+
+      if (testInProgress) {
+        // Modern browsers ignore custom messages, but we can set returnValue
+        e.preventDefault()
+        // Chrome requires returnValue to be set
+        e.returnValue = ''
+        // Return a message (though most browsers will show their own)
+        return 'Are you sure you want to leave? Your test progress will be lost.'
+      }
+    }
+
+    // Add event listener
+    window.addEventListener('beforeunload', handleBeforeUnload)
+
+    // Cleanup on unmount
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+    }
+  }, [currentView, testData])
+
+  const fetchTestData = async (testId) => {
+    try {
+      // Get authentication token from platform's localStorage
+      // This token was either:
+      // 1. Passed from landing page via URL query parameter and stored above
+      // 2. Already stored from a previous session on this domain
+      const token = localStorage.getItem('auth_token')
+
+      if (!token) {
+        setLoadingError('Authentication required. Please log in from the landing page first.')
+        return
+      }
+
+      console.log('Using token from platform localStorage for API request')
+
+      const response = await fetch(`${API_BASE_URL}/api/v1/tests/${testId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          setLoadingError('Authentication failed. Please log in again.')
+        } else if (response.status === 403) {
+          setLoadingError('You do not have access to this test. Premium subscription required.')
+        } else if (response.status === 404) {
+          setLoadingError(`Test ${testId} not found.`)
+        } else {
+          setLoadingError('Failed to load test data. Please try again.')
+        }
+        return
+      }
+
+      const data = await response.json()
+      setTestData(data)
+      setCurrentView('welcome')
+    } catch (error) {
+      console.error('Error fetching test data:', error)
+      setLoadingError('Network error. Please check your connection and try again.')
+    }
+  }
 
   const handleWelcomeContinue = () => {
     setCurrentView('hardware-check')
@@ -125,6 +246,165 @@ function App() {
       ...prev,
       [questionId]: answer
     }))
+  }
+
+  // Show loading state
+  if (currentView === 'loading') {
+    return (
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: '100vh',
+            backgroundColor: '#F5F5F5',
+            padding: '24px',
+            gap: loadingError ? 3 : 2,
+          }}
+        >
+          {loadingError ? (
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                maxWidth: '440px',
+                width: '100%',
+                animation: 'fadeInUp 0.8s ease-out',
+                '@keyframes fadeInUp': {
+                  from: {
+                    opacity: 0,
+                    transform: 'translateY(30px)',
+                  },
+                  to: {
+                    opacity: 1,
+                    transform: 'translateY(0)',
+                  },
+                },
+              }}
+            >
+              {/* Error Message Box */}
+              <Box
+                sx={{
+                  width: '100%',
+                  backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                  border: '1px solid rgba(220, 53, 69, 0.2)',
+                  borderRadius: '8px',
+                  padding: '16px',
+                  marginBottom: '24px',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '12px',
+                }}
+              >
+                <Box
+                  sx={{
+                    minWidth: '24px',
+                    width: '24px',
+                    height: '24px',
+                    borderRadius: '50%',
+                    backgroundColor: '#dc3545',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#ffffff',
+                    fontSize: '16px',
+                    fontWeight: 'bold',
+                    flexShrink: 0,
+                  }}
+                >
+                  !
+                </Box>
+                <Typography
+                  sx={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontSize: '16px',
+                    fontWeight: 400,
+                    color: '#B32626',
+                    lineHeight: 1.5,
+                    flex: 1,
+                  }}
+                >
+                  {loadingError}
+                </Typography>
+              </Box>
+
+              {/* Go to Login Button */}
+              <Button
+                onClick={() => {
+                  // Redirect to landing page login
+                  const landingUrl = import.meta.env.VITE_LANDING_URL || 'http://localhost:5173'
+                  window.location.href = `${landingUrl}/login`
+                }}
+                sx={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: '18px',
+                  fontWeight: 500,
+                  color: '#ffffff',
+                  backgroundColor: '#086A6F',
+                  border: 'none',
+                  borderRadius: '8px',
+                  padding: '16px 32px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  transition: 'all 0.3s ease',
+                  boxShadow: '0 2px 8px rgba(8, 106, 111, 0.2)',
+                  width: '100%',
+                  textTransform: 'none',
+                  '&:hover': {
+                    backgroundColor: '#065559',
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 4px 12px rgba(8, 106, 111, 0.3)',
+                  },
+                  '&:active': {
+                    transform: 'translateY(0)',
+                  },
+                }}
+              >
+                GO TO LOGIN
+                <Box
+                  component="span"
+                  sx={{
+                    fontSize: '20px',
+                    transition: 'transform 0.3s ease',
+                    '&:hover': {
+                      transform: 'translateX(4px)',
+                    },
+                  }}
+                >
+                  →
+                </Box>
+              </Button>
+            </Box>
+          ) : (
+            <>
+              <CircularProgress sx={{ color: '#086A6F' }} />
+              <Typography
+                sx={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: '16px',
+                  color: '#000000',
+                }}
+              >
+                Loading test data...
+              </Typography>
+            </>
+          )}
+        </Box>
+      </ThemeProvider>
+    )
+  }
+
+  // Don't render anything if testData is not loaded
+  if (!testData) {
+    return null
   }
 
   return (
