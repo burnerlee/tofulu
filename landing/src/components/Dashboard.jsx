@@ -14,7 +14,7 @@ function Dashboard() {
   // Platform URL - can be configured via environment variable
   const PLATFORM_URL = import.meta.env.VITE_PLATFORM_URL || 'http://localhost:5174'
 
-  // Fetch tests from backend
+// Fetch tests from backend
   useEffect(() => {
     const fetchTests = async () => {
       try {
