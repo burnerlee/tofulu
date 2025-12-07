@@ -5,8 +5,8 @@ pydantic==2.10.6
 pydantic-core==2.27.2
 pydantic-settings==2.1.0
 python-multipart==0.0.6
-pydantic[email]
-
+pydantic[email]==
+boto==2.49.0
 # Email providers (recommended for OTP)
 resend==1.0.0  # Recommended: Free tier 3,000/month, then $20/month for 50k
 # boto3==1.29.7  # For AWS SES (very cheap at scale)
