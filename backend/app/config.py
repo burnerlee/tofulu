@@ -68,6 +68,9 @@ class Settings(BaseSettings):
     AWS_SECRET_ACCESS_KEY: str = os.getenv("AWS_SECRET_ACCESS_KEY", "")
     AWS_REGION: str = os.getenv("AWS_REGION", "us-east-1")
     
+    # S3 Presigned URL Configuration
+    S3_PRESIGNED_URL_EXPIRY_SECONDS: int = int(os.getenv("S3_PRESIGNED_URL_EXPIRY_SECONDS", "7200"))  # 2 hours default
+    
     # Database Configuration (for future use)
     DATABASE_URL: str = os.getenv("DATABASE_URL", "")
     

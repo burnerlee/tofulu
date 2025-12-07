@@ -2,8 +2,9 @@ import { useState, useEffect, useRef } from 'react'
 import { Box, Typography, Radio, RadioGroup, FormControlLabel, FormControl, Button } from '@mui/material'
 import RefreshIcon from '@mui/icons-material/Refresh'
 import { useVolume } from '../../contexts/VolumeContext'
+import { resolveAudioReference, resolveAssetReference } from '../../utils/assetResolver'
 
-function BestResponseQuestion({ bundle, question, assets, userAnswers, onAnswerChange }) {
+function BestResponseQuestion({ bundle, question, assets, assetReferencesResolved = [], userAnswers, onAnswerChange }) {
   const { getVolumeDecimal } = useVolume()
   const [optionsEnabled, setOptionsEnabled] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
@@ -38,8 +39,20 @@ function BestResponseQuestion({ bundle, question, assets, userAnswers, onAnswerC
     setOptionsEnabled(false)
     setIsPlaying(false)
     
+    // Resolve audioReference to URL
+    const audioUrl = question.audioReference 
+      ? resolveAudioReference(question.audioReference, assetReferencesResolved)
+      : (question.audioUrl || null) // Fallback to old format for backward compatibility
+    
+    if (!audioUrl) {
+      console.error('No audio URL available for question:', question.id)
+      setOptionsEnabled(true)
+      setIsPlaying(false)
+      return
+    }
+    
     // Create audio element
-    const audio = new Audio(question.audioUrl || 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_1c15910a47.mp3?filename=this-doesnt-smell-87209.mp3')
+    const audio = new Audio(audioUrl)
     audio.volume = getVolumeDecimal() // Apply volume setting
     audioRef.current = audio
 
@@ -81,7 +94,7 @@ function BestResponseQuestion({ bundle, question, assets, userAnswers, onAnswerC
       currentQuestionIdRef: currentQuestionIdRef.current,
       hasPlayedRef: hasPlayedRef.current,
       refreshTrigger,
-      audioUrl: question.audioUrl
+      audioReference: question.audioReference
     })
     
     // Reset hasPlayed flag when question changes (not on refresh)
@@ -251,7 +264,7 @@ function BestResponseQuestion({ bundle, question, assets, userAnswers, onAnswerC
         }
       }, 0)
     }
-  }, [question.id, question.audioUrl, refreshTrigger])
+  }, [question.id, question.audioReference, assetReferencesResolved, refreshTrigger])
 
   const handleRefresh = () => {
     // Clear the selected answer
@@ -331,21 +344,25 @@ function BestResponseQuestion({ bundle, question, assets, userAnswers, onAnswerC
             paddingTop: '20px',
           }}
         >
-          {question.characterImageID && assets[question.characterImageID] && (
-            <Box
-              component="img"
-              src={assets[question.characterImageID]}
-              alt={question.character || 'Character'}
-              sx={{
-                maxWidth: '280px',
-                maxHeight: '400px',
-                width: 'auto',
-                height: 'auto',
-                objectFit: 'contain',
-                objectPosition: 'center top',
-              }}
-            />
-          )}
+          {question.characterImageID && (() => {
+            const imageUrl = resolveAssetReference(question.characterImageID, assetReferencesResolved) || 
+                            (assets && assets[question.characterImageID]) // Fallback to old format
+            return imageUrl ? (
+              <Box
+                component="img"
+                src={imageUrl}
+                alt={question.character || 'Character'}
+                sx={{
+                  maxWidth: '280px',
+                  maxHeight: '400px',
+                  width: 'auto',
+                  height: 'auto',
+                  objectFit: 'contain',
+                  objectPosition: 'center top',
+                }}
+              />
+            ) : null
+          })()}
         </Box>
 
         {/* Right side - Options */}

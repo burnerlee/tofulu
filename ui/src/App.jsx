@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
-import { Box, Typography, Button, CircularProgress, Alert } from '@mui/material'
+import { Box, Typography, Button, CircularProgress, Alert, Link } from '@mui/material'
 import { VolumeProvider } from './contexts/VolumeContext'
 import WelcomePage from './components/WelcomePage'
 import HardwareCheck from './components/HardwareCheck'
@@ -29,6 +29,40 @@ const theme = createTheme({
   },
 })
 
+// Helper function to render error message with clickable email links
+const renderErrorMessage = (message) => {
+  // Email regex pattern
+  const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/g
+  
+  if (!message) return null
+  
+  const parts = message.split(emailRegex)
+  
+  return parts.map((part, index) => {
+    // Check if part matches email pattern (create new regex for testing to avoid global flag issues)
+    const isEmail = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+$/.test(part)
+    
+    if (isEmail) {
+      return (
+        <Link
+          key={index}
+          href={`mailto:${part}`}
+          sx={{
+            color: '#B32626',
+            textDecoration: 'underline',
+            '&:hover': {
+              textDecoration: 'none',
+            },
+          }}
+        >
+          {part}
+        </Link>
+      )
+    }
+    return <span key={index}>{part}</span>
+  })
+}
+
 function App() {
   const [currentView, setCurrentView] = useState('loading')
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0)
@@ -37,27 +71,70 @@ function App() {
   const [testData, setTestData] = useState(null)
   const [loadingError, setLoadingError] = useState(null)
 
-  // Get test ID and token from URL query parameters
+  // Get test ID and token from sessionStorage (from redirect) or URL query parameters
   useEffect(() => {
+    // Always start with loading state
+    setCurrentView('loading')
+    setLoadingError(null)
+
+    // Check if we have a pending test load flag in localStorage
+    // This flag indicates we've already started loading a test (even if URL was cleaned)
+    const pendingTestLoadFlag = localStorage.getItem('pending_test_load')
+    const storedTestId = localStorage.getItem('pending_test_id')
+
+    // Check sessionStorage first (more reliable for redirects)
+    const pendingTestId = sessionStorage.getItem('pending_test_id')
+    const pendingToken = sessionStorage.getItem('pending_token')
+    const redirectTimestamp = sessionStorage.getItem('redirect_timestamp')
+    
+    // Check if redirect data is recent (within last 5 minutes)
+    const isRecentRedirect = redirectTimestamp && (Date.now() - parseInt(redirectTimestamp)) < 5 * 60 * 1000
+
+    // Fall back to URL parameters if sessionStorage doesn't have it
     const urlParams = new URLSearchParams(window.location.search)
-    const testId = urlParams.get('test')
+    const testIdFromUrl = urlParams.get('test')
     const tokenFromUrl = urlParams.get('token')
 
+    // Determine which test ID and token to use
+    // Prefer sessionStorage if it's a recent redirect, otherwise use URL params, then localStorage
+    let testId = null
+    let token = null
+
+    if (pendingTestId && isRecentRedirect) {
+      // Use sessionStorage data (from redirect)
+      testId = pendingTestId
+      token = pendingToken
+      console.log('Using test ID and token from sessionStorage (redirect)')
+    } else if (testIdFromUrl) {
+      // Use URL parameters (fallback or direct access)
+      testId = testIdFromUrl
+      token = tokenFromUrl
+      console.log('Using test ID and token from URL parameters')
+    } else if (pendingTestLoadFlag === 'true' && storedTestId) {
+      // We have a pending test load flag - this means we're resuming after URL cleanup
+      // Use the stored testId and continue loading
+      testId = storedTestId
+      console.log('Resuming test load from localStorage (after URL cleanup)')
+    }
+
+    // Store token in localStorage if we have one
+    if (token) {
+      localStorage.setItem('auth_token', token)
+      console.log('Token stored in platform localStorage')
+    }
+
     // Clean up URL by removing both token and test ID after reading them
+    // But only clean up if we've successfully extracted the testId from URL
     const newParams = new URLSearchParams(window.location.search)
     let urlChanged = false
 
-    // If token is provided in URL, store it in localStorage (platform's own localStorage)
     if (tokenFromUrl) {
-      // Store token in platform's localStorage
-      localStorage.setItem('auth_token', tokenFromUrl)
-      console.log('Token stored in platform localStorage')
       newParams.delete('token')
       urlChanged = true
     }
 
-    // Remove test ID from URL after reading it
-    if (testId) {
+    if (testIdFromUrl && testId) {
+      // Only remove test from URL if we successfully extracted it from URL
       newParams.delete('test')
       urlChanged = true
     }
@@ -70,12 +147,56 @@ function App() {
       window.history.replaceState({}, '', newUrl)
     }
 
-    if (testId) {
-      // Fetch test data from backend (will use token from localStorage)
-      fetchTestData(parseInt(testId))
+    // Now clean up sessionStorage after URL cleanup (if we used sessionStorage)
+    if (pendingTestId && isRecentRedirect) {
+      sessionStorage.removeItem('pending_test_id')
+      sessionStorage.removeItem('pending_token')
+      sessionStorage.removeItem('redirect_timestamp')
+    }
+
+    // Process the test ID
+    const trimmedTestId = testId ? String(testId).trim() : ''
+    if (trimmedTestId !== '') {
+      const testIdNum = parseInt(trimmedTestId)
+      if (!isNaN(testIdNum) && testIdNum > 0) {
+        // Set the pending test load flag BEFORE calling fetchTestData
+        // This ensures that even if the component re-renders or page reloads,
+        // we know we're in the middle of loading a test
+        localStorage.setItem('pending_test_load', 'true')
+        localStorage.setItem('pending_test_id', trimmedTestId)
+        
+        // Fetch test data from backend (will use token from localStorage)
+        // fetchTestData will handle loading state and errors
+        fetchTestData(testIdNum)
+      } else {
+        // Invalid test ID format
+        // Clear any pending flags
+        localStorage.removeItem('pending_test_load')
+        localStorage.removeItem('pending_test_id')
+        setLoadingError('Invalid test ID. Please start a test from the dashboard.')
+      }
     } else {
-      // No test ID provided - test must be accessed from dashboard
-      setLoadingError('No test specified. Please start a test from the dashboard.')
+      // No test ID found in sessionStorage, URL, or localStorage
+      // Check if we have a pending test load flag - if so, show loader instead of error
+      if (pendingTestLoadFlag === 'true' && storedTestId) {
+        // We're in the middle of loading - show loader, don't show error
+        // Try to resume loading with the stored testId
+        const testIdNum = parseInt(storedTestId)
+        if (!isNaN(testIdNum) && testIdNum > 0) {
+          fetchTestData(testIdNum)
+        } else {
+          // Invalid stored testId - clear flags and show error
+          localStorage.removeItem('pending_test_load')
+          localStorage.removeItem('pending_test_id')
+          setLoadingError('Invalid test ID. Please start a test from the dashboard.')
+        }
+      } else {
+        // No test ID and no pending load flag - this is direct/malicious access
+        // Clear any stale flags
+        localStorage.removeItem('pending_test_load')
+        localStorage.removeItem('pending_test_id')
+        setLoadingError('Invalid Test Access. Please start a test from the dashboard.')
+      }
     }
   }, [])
 
@@ -111,6 +232,10 @@ function App() {
 
   const fetchTestData = async (testId) => {
     try {
+      // Set loading state
+      setCurrentView('loading')
+      setLoadingError(null)
+
       // Get authentication token from platform's localStorage
       // This token was either:
       // 1. Passed from landing page via URL query parameter and stored above
@@ -118,6 +243,9 @@ function App() {
       const token = localStorage.getItem('auth_token')
 
       if (!token) {
+        // Clear pending flags on auth error
+        localStorage.removeItem('pending_test_load')
+        localStorage.removeItem('pending_test_id')
         setLoadingError('Authentication required. Please log in from the landing page first.')
         return
       }
@@ -133,14 +261,21 @@ function App() {
       })
 
       if (!response.ok) {
+        // Clear pending flags on API error
+        localStorage.removeItem('pending_test_load')
+        localStorage.removeItem('pending_test_id')
+        
         if (response.status === 401) {
           setLoadingError('Authentication failed. Please log in again.')
         } else if (response.status === 403) {
           setLoadingError('You do not have access to this test. Premium subscription required.')
         } else if (response.status === 404) {
           setLoadingError(`Test ${testId} not found.`)
+        } else if (response.status === 500) {
+          // Handle server errors (including missing assets)
+          setLoadingError('Something went wrong - we\'re working on it. If it persists reach out to us at hello@testino.space')
         } else {
-          setLoadingError('Failed to load test data. Please try again.')
+          setLoadingError('Something went wrong - we\'re working on it. If it persists reach out to us at hello@testino.space')
         }
         return
       }
@@ -148,9 +283,16 @@ function App() {
       const data = await response.json()
       setTestData(data)
       setCurrentView('welcome')
+      
+      // Clear pending flags on successful completion
+      localStorage.removeItem('pending_test_load')
+      localStorage.removeItem('pending_test_id')
     } catch (error) {
+      // Clear pending flags on exception
+      localStorage.removeItem('pending_test_load')
+      localStorage.removeItem('pending_test_id')
       console.error('Error fetching test data:', error)
-      setLoadingError('Network error. Please check your connection and try again.')
+      setLoadingError('Something went wrong - we\'re working on it. If it persists reach out to us at hello@testino.space')
     }
   }
 
@@ -297,7 +439,8 @@ function App() {
                   padding: '16px',
                   marginBottom: '24px',
                   display: 'flex',
-                  alignItems: 'flex-start',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                   gap: '12px',
                 }}
               >
@@ -326,62 +469,64 @@ function App() {
                     fontWeight: 400,
                     color: '#B32626',
                     lineHeight: 1.5,
-                    flex: 1,
+                    textAlign: 'center',
                   }}
                 >
-                  {loadingError}
+                  {renderErrorMessage(loadingError)}
                 </Typography>
               </Box>
 
-              {/* Go to Login Button */}
-              <Button
-                onClick={() => {
-                  // Redirect to landing page login
-                  const landingUrl = import.meta.env.VITE_LANDING_URL || 'http://localhost:5173'
-                  window.location.href = `${landingUrl}/login`
-                }}
-                sx={{
-                  fontFamily: "'Inter', sans-serif",
-                  fontSize: '18px',
-                  fontWeight: 500,
-                  color: '#ffffff',
-                  backgroundColor: '#086A6F',
-                  border: 'none',
-                  borderRadius: '8px',
-                  padding: '16px 32px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px',
-                  transition: 'all 0.3s ease',
-                  boxShadow: '0 2px 8px rgba(8, 106, 111, 0.2)',
-                  width: '100%',
-                  textTransform: 'none',
-                  '&:hover': {
-                    backgroundColor: '#065559',
-                    transform: 'translateY(-2px)',
-                    boxShadow: '0 4px 12px rgba(8, 106, 111, 0.3)',
-                  },
-                  '&:active': {
-                    transform: 'translateY(0)',
-                  },
-                }}
-              >
-                GO TO LOGIN
-                <Box
-                  component="span"
+              {/* Action Button - Only show for auth errors, not server errors */}
+              {loadingError.includes('Authentication') || loadingError.includes('access') || loadingError.includes('not found') ? (
+                <Button
+                  onClick={() => {
+                    // Redirect to landing page login
+                    const landingUrl = import.meta.env.VITE_LANDING_URL || 'http://localhost:5173'
+                    window.location.href = `${landingUrl}/login`
+                  }}
                   sx={{
-                    fontSize: '20px',
-                    transition: 'transform 0.3s ease',
+                    fontFamily: "'Inter', sans-serif",
+                    fontSize: '18px',
+                    fontWeight: 500,
+                    color: '#ffffff',
+                    backgroundColor: '#086A6F',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '16px 32px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    transition: 'all 0.3s ease',
+                    boxShadow: '0 2px 8px rgba(8, 106, 111, 0.2)',
+                    width: '100%',
+                    textTransform: 'none',
                     '&:hover': {
-                      transform: 'translateX(4px)',
+                      backgroundColor: '#065559',
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 4px 12px rgba(8, 106, 111, 0.3)',
+                    },
+                    '&:active': {
+                      transform: 'translateY(0)',
                     },
                   }}
                 >
-                  →
-                </Box>
-              </Button>
+                  GO TO LOGIN
+                  <Box
+                    component="span"
+                    sx={{
+                      fontSize: '20px',
+                      transition: 'transform 0.3s ease',
+                      '&:hover': {
+                        transform: 'translateX(4px)',
+                      },
+                    }}
+                  >
+                    →
+                  </Box>
+                </Button>
+              ) : null}
             </Box>
           ) : (
             <>
@@ -393,7 +538,7 @@ function App() {
                   color: '#000000',
                 }}
               >
-                Loading test data...
+                Preparing your test platform... we're so excited for you! 🚀
               </Typography>
             </>
           )}
@@ -529,6 +674,7 @@ function App() {
               sectionName: testData.sections[currentSectionIndex].sectionName
             }}
             assets={testData.assets || {}}
+            assetReferencesResolved={testData.assetReferencesResolved || []}
             userAnswers={userAnswers}
             onAnswerChange={updateAnswer}
             onComplete={handleModuleComplete}

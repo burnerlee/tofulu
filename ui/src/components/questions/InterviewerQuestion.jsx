@@ -3,9 +3,10 @@ import { Box, Typography, Modal, Divider } from '@mui/material'
 import MicIcon from '@mui/icons-material/Mic'
 import MicOffIcon from '@mui/icons-material/MicOff'
 import { useVolume } from '../../contexts/VolumeContext'
+import { resolveAudioReference, resolveAssetReference } from '../../utils/assetResolver'
 import interviewerAudio from '../../audios/interviewer.mp3'
 
-const InterviewerQuestion = forwardRef(function InterviewerQuestion({ bundle, assets, onNextChild, isParent, currentChildIndex, hasSeenIntro = false }, ref) {
+const InterviewerQuestion = forwardRef(function InterviewerQuestion({ bundle, assets, assetReferencesResolved = [], onNextChild, isParent, currentChildIndex, hasSeenIntro = false }, ref) {
   const { getVolumeDecimal } = useVolume()
   // State management
   const [isPlaying, setIsPlaying] = useState(false)
@@ -30,8 +31,15 @@ const InterviewerQuestion = forwardRef(function InterviewerQuestion({ bundle, as
   // Use InterviewerQuestions instead of childQuestions
   const currentChild = !isParent && bundle.InterviewerQuestions && bundle.InterviewerQuestions[currentChildIndex] ? bundle.InterviewerQuestions[currentChildIndex] : null
   const displayImageID = isParent ? bundle.displayImageID : (currentChild?.displayImageID)
-  const audioAsset = isParent ? bundle.audioAsset : (currentChild?.audioAsset)
-  const imageUrl = displayImageID && assets[displayImageID] ? assets[displayImageID] : null
+  const audioReference = isParent ? bundle.audioReference : (currentChild?.audioReference)
+  // Resolve audioReference to URL
+  const audioAsset = audioReference 
+    ? resolveAudioReference(audioReference, assetReferencesResolved)
+    : (isParent ? bundle.audioAsset : (currentChild?.audioAsset)) // Fallback to old format
+  const imageUrl = displayImageID 
+    ? (resolveAssetReference(displayImageID, assetReferencesResolved) || 
+       (assets && assets[displayImageID])) // Fallback to old format
+    : null
 
   // Cleanup function
   const cleanup = () => {
@@ -122,7 +130,8 @@ const InterviewerQuestion = forwardRef(function InterviewerQuestion({ bundle, as
   // Play deep sound (beep sound)
   const playDeepSound = () => {
     // Use the beep sound asset from testData
-    const beepSoundUrl = assets['beep-sound']
+    const beepSoundUrl = resolveAssetReference('image-reference/beep-sound', assetReferencesResolved) || 
+                        (assets && assets['beep-sound']) // Fallback to old format
     if (beepSoundUrl) {
       try {
         // Clean up any existing beep sound
@@ -240,7 +249,7 @@ const InterviewerQuestion = forwardRef(function InterviewerQuestion({ bundle, as
   // Parent phase: show image, wait 2 seconds, play audio, wait 2 seconds, then auto-advance to first child
   // Only start after intro is dismissed
   useEffect(() => {
-    if (isParent && bundle.audioAsset && !showIntro) {
+    if (isParent && audioAsset && !showIntro) {
       // Reset parent-specific state
       setParentCompleted(false)
       hasAutoAdvancedRef.current = false
@@ -268,7 +277,7 @@ const InterviewerQuestion = forwardRef(function InterviewerQuestion({ bundle, as
       // Step 1: Wait 2 seconds before playing audio
       delayTimerRef.current = setTimeout(() => {
         // Step 2: Play parent audio
-        const audio = new Audio(bundle.audioAsset)
+        const audio = new Audio(audioAsset)
         audioRef.current = audio
         
         const handleEnded = () => {
@@ -338,7 +347,7 @@ const InterviewerQuestion = forwardRef(function InterviewerQuestion({ bundle, as
         delayTimerRef.current = null
       }
     }
-  }, [isParent, bundle.audioAsset, onNextChild, showIntro])
+  }, [isParent, audioAsset, onNextChild, showIntro])
 
   // Child phase: handle child question sequence
   useEffect(() => {
@@ -358,8 +367,14 @@ const InterviewerQuestion = forwardRef(function InterviewerQuestion({ bundle, as
       // Step 1: Show screen (already shown via imageUrl)
       // Step 2: After 2 seconds, play audio
       delayTimerRef.current = setTimeout(() => {
-        if (currentChild.audioAsset) {
-          playAudio(currentChild.audioAsset, () => {
+        // Resolve audioReference for current child
+        const childAudioReference = currentChild?.audioReference
+        const childAudioAsset = childAudioReference 
+          ? resolveAudioReference(childAudioReference, assetReferencesResolved)
+          : (currentChild?.audioAsset) // Fallback to old format
+        
+        if (childAudioAsset) {
+          playAudio(childAudioAsset, () => {
             // Step 3: After audio completes, wait 2 seconds
             delayTimerRef.current = setTimeout(() => {
               // Step 4: Play deep sound
@@ -377,7 +392,7 @@ const InterviewerQuestion = forwardRef(function InterviewerQuestion({ bundle, as
     
     return cleanup
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isParent, currentChild, currentChildIndex])
+  }, [isParent, currentChild, currentChildIndex, assetReferencesResolved])
 
   // Format timer
   const formatTimer = (seconds) => {

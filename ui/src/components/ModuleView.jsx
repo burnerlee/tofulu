@@ -19,7 +19,7 @@ import ListenPassageQuestion from './questions/ListenPassageQuestion'
 import ListenAndRepeat from './questions/ListenAndRepeat'
 import InterviewerQuestion from './questions/InterviewerQuestion'
 
-function ModuleView({ module, assets, userAnswers, onAnswerChange, onComplete, skipIntro = false }) {
+function ModuleView({ module, assets, assetReferencesResolved = [], userAnswers, onAnswerChange, onComplete, skipIntro = false }) {
   // Create a list of bundles with their types and question counts
   const bundleList = useMemo(() => {
     return module.questions.map((bundle) => {
@@ -1015,6 +1015,7 @@ function ModuleView({ module, assets, userAnswers, onAnswerChange, onComplete, s
               ref={listenAndRepeatRef}
               bundle={currentBundle}
               assets={assets}
+              assetReferencesResolved={assetReferencesResolved}
               isParent={isParent}
               currentChildIndex={childIndex}
               hasSeenIntro={hasSeenIntro}
@@ -1050,6 +1051,7 @@ function ModuleView({ module, assets, userAnswers, onAnswerChange, onComplete, s
               ref={interviewerQuestionRef}
               bundle={currentBundle}
               assets={assets}
+              assetReferencesResolved={assetReferencesResolved}
               isParent={isParent}
               currentChildIndex={childIndex}
               hasSeenIntro={hasSeenIntro}
@@ -1120,6 +1122,7 @@ function ModuleView({ module, assets, userAnswers, onAnswerChange, onComplete, s
                 onAnswerChange={handleAnswerChange}
                 isTimerExpired={isTimerExpired}
                 assets={assets}
+                assetReferencesResolved={assetReferencesResolved}
                 hasSeenIntro={currentQuestionId ? questionsSeenIntro.has(currentQuestionId) : false}
               />
             )}
@@ -1131,6 +1134,7 @@ function ModuleView({ module, assets, userAnswers, onAnswerChange, onComplete, s
                 userAnswers={userAnswers}
                 onAnswerChange={handleAnswerChange}
                 assets={assets}
+                assetReferencesResolved={assetReferencesResolved}
                 hasSeenIntro={currentQuestionId ? questionsSeenIntro.has(currentQuestionId) : false}
               />
             )}
@@ -1139,6 +1143,7 @@ function ModuleView({ module, assets, userAnswers, onAnswerChange, onComplete, s
                 bundle={currentQuestionItem.bundle}
                 question={currentQuestionItem.question}
                 assets={assets}
+                assetReferencesResolved={assetReferencesResolved}
                 userAnswers={userAnswers}
                 onAnswerChange={handleAnswerChange}
               />
@@ -1148,6 +1153,7 @@ function ModuleView({ module, assets, userAnswers, onAnswerChange, onComplete, s
                 bundle={currentQuestionItem.bundle}
                 question={currentQuestionItem.question}
                 assets={assets}
+                assetReferencesResolved={assetReferencesResolved}
                 userAnswers={userAnswers}
                 onAnswerChange={handleAnswerChange}
                 onNavigateToFirstQuestion={() => {

@@ -70,8 +70,13 @@ function Dashboard() {
       return
     }
 
-    // Redirect to platform with test ID and token as query parameters
-    // The platform will store the token in its own localStorage and remove it from URL
+    // Store test ID and token in sessionStorage before redirecting
+    // This ensures they're available even if URL params are read before redirect completes
+    sessionStorage.setItem('pending_test_id', testId.toString())
+    sessionStorage.setItem('pending_token', token)
+    sessionStorage.setItem('redirect_timestamp', Date.now().toString())
+
+    // Also pass in URL as fallback
     const params = new URLSearchParams({
       test: testId.toString(),
       token: token

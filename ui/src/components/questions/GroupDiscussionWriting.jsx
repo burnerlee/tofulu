@@ -7,7 +7,9 @@ import RedoIcon from '@mui/icons-material/Redo'
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
 
-const GroupDiscussionWriting = forwardRef(function GroupDiscussionWriting({ bundle, question, userAnswers, onAnswerChange, isTimerExpired = false, assets, hasSeenIntro = false }, ref) {
+import { resolveAssetReference } from '../../utils/assetResolver'
+
+const GroupDiscussionWriting = forwardRef(function GroupDiscussionWriting({ bundle, question, userAnswers, onAnswerChange, isTimerExpired = false, assets, assetReferencesResolved = [], hasSeenIntro = false }, ref) {
   // Check if this is the first question in the bundle
   const isFirstQuestion = bundle.questions && bundle.questions[0]?.id === question.id
   const [showIntro, setShowIntro] = useState(() => bundle.questions && bundle.questions[0]?.id === question.id && !hasSeenIntro)
@@ -278,23 +280,27 @@ const GroupDiscussionWriting = forwardRef(function GroupDiscussionWriting({ bund
           />
 
           {/* Professor Image */}
-          {professorImageID && assets && assets[professorImageID] && (
-            <Box
-              sx={{
-                marginTop: '24px',
-                marginBottom: '16px',
-              }}
-            >
-              <Avatar
-                src={assets[professorImageID]}
-                alt="Professor"
+          {professorImageID && (() => {
+            const imageUrl = resolveAssetReference(professorImageID, assetReferencesResolved) || 
+                            (assets && assets[professorImageID]) // Fallback to old format
+            return imageUrl ? (
+              <Box
                 sx={{
-                  width: 80,
-                  height: 80,
+                  marginTop: '24px',
+                  marginBottom: '16px',
                 }}
-              />
-            </Box>
-          )}
+              >
+                <Avatar
+                  src={imageUrl}
+                  alt="Professor"
+                  sx={{
+                    width: 80,
+                    height: 80,
+                  }}
+                />
+              </Box>
+            ) : null
+          })()}
 
           {/* Question Text */}
           {bundle.questionText && (
@@ -340,17 +346,21 @@ const GroupDiscussionWriting = forwardRef(function GroupDiscussionWriting({ bund
                     marginBottom: '20px',
                   }}
                 >
-                  {comment.characterImageID && assets && assets[comment.characterImageID] && (
-                    <Avatar
-                      src={assets[comment.characterImageID]}
+                  {comment.characterImageID && (() => {
+                    const imageUrl = resolveAssetReference(comment.characterImageID, assetReferencesResolved) || 
+                                    (assets && assets[comment.characterImageID]) // Fallback to old format
+                    return imageUrl ? (
+                      <Avatar
+                        src={imageUrl}
                       alt={`Commenter ${index + 1}`}
                       sx={{
                         width: 50,
                         height: 50,
                         flexShrink: 0,
                       }}
-                    />
-                  )}
+              />
+            ) : null
+          })()}
                   <Typography
                     sx={{
                       fontSize: '14px',

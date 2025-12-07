@@ -2,8 +2,9 @@ import { useState, useEffect, useRef } from 'react'
 import { Box, Typography, Radio, RadioGroup, FormControlLabel, FormControl, Button } from '@mui/material'
 import RefreshIcon from '@mui/icons-material/Refresh'
 import { useVolume } from '../../contexts/VolumeContext'
+import { resolveAudioReference, resolveAssetReference } from '../../utils/assetResolver'
 
-function ListenPassageQuestion({ bundle, question, assets, userAnswers, onAnswerChange, onNavigateToFirstQuestion }) {
+function ListenPassageQuestion({ bundle, question, assets, assetReferencesResolved = [], userAnswers, onAnswerChange, onNavigateToFirstQuestion }) {
   const { getVolumeDecimal } = useVolume()
   // Check if this is the first question in the bundle
   const isFirstQuestion = bundle.questions && bundle.questions[0]?.id === question.id
@@ -44,8 +45,21 @@ function ListenPassageQuestion({ bundle, question, assets, userAnswers, onAnswer
     setOptionsEnabled(false)
     setIsPlaying(false)
     
-    // Create audio element
-    const audioUrl = bundle.audioUrl || 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_1c15910a47.mp3?filename=this-doesnt-smell-87209.mp3'
+    // Resolve audioReference to URL
+    const audioUrl = bundle.audioReference 
+      ? resolveAudioReference(bundle.audioReference, assetReferencesResolved)
+      : (bundle.audioUrl || null) // Fallback to old format for backward compatibility
+    
+    if (!audioUrl) {
+      console.error('[ListenPassageQuestion] No audio URL available for bundle:', bundle.id)
+      setIsPlaying(false)
+      if (isIntroScreen) {
+        setShowIntro(false)
+      }
+      setOptionsEnabled(true)
+      return
+    }
+    
     console.log('[ListenPassageQuestion] Creating audio element', { audioUrl })
     const audio = new Audio(audioUrl)
     audio.volume = getVolumeDecimal() // Apply volume setting
@@ -108,7 +122,7 @@ function ListenPassageQuestion({ bundle, question, assets, userAnswers, onAnswer
       currentQuestionIdRef: currentQuestionIdRef.current,
       hasPlayedRef: hasPlayedRef.current,
       refreshTrigger,
-      audioUrl: bundle.audioUrl
+      audioReference: bundle.audioReference
     })
     
     // Reset state when question changes
@@ -225,7 +239,7 @@ function ListenPassageQuestion({ bundle, question, assets, userAnswers, onAnswer
         }
       }, 0)
     }
-  }, [question.id, bundle.audioUrl, bundle.questions, refreshTrigger])
+  }, [question.id, bundle.audioReference, assetReferencesResolved, bundle.questions, refreshTrigger])
 
   const handleRefresh = () => {
     console.log('[ListenPassageQuestion] Refresh button clicked', {
@@ -258,8 +272,9 @@ function ListenPassageQuestion({ bundle, question, assets, userAnswers, onAnswer
     }
   }
 
-  const characterImageUrl = bundle.characterImageID && assets[bundle.characterImageID] 
-    ? assets[bundle.characterImageID] 
+  const characterImageUrl = bundle.characterImageID 
+    ? (resolveAssetReference(bundle.characterImageID, assetReferencesResolved) || 
+       (assets && assets[bundle.characterImageID])) // Fallback to old format
     : null
 
   // Intro screen - show heading and character image, play audio

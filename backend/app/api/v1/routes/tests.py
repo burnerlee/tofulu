@@ -3,17 +3,17 @@ Test data route handlers.
 """
 import logging
 import json
-import os
 from pathlib import Path
 from fastapi import APIRouter, HTTPException, status, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from pydantic import BaseModel
 
 from app.core.security import verify_token
 from app.database import get_db
 from sqlalchemy.orm import Session
 from app.models.user import User
+from app.config import get_settings
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +22,18 @@ security = HTTPBearer()
 
 router = APIRouter(prefix="/tests", tags=["tests"])
 
+# S3 bucket name for tests
+TESTS_S3_BUCKET = "testino-tests"
+
+# Check if boto3 is available
+try:
+    import boto3
+    from botocore.exceptions import ClientError
+    BOTO3_AVAILABLE = True
+except ImportError:
+    BOTO3_AVAILABLE = False
+    logger.warning("boto3 not installed. S3 operations will fail.")
+
 
 class TestListItem(BaseModel):
     """Model for test list item response."""
@@ -29,14 +41,173 @@ class TestListItem(BaseModel):
     name: str
     unlocked: bool
 
-# Get the base directory (backend/)
-# Path from tests.py: app/api/v1/routes/tests.py
-# Go up 5 levels: app -> api -> v1 -> routes -> (tests.py is here)
-BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
-TESTS_DIR = BASE_DIR / "data" / "tests"
 
-# Log the path for debugging (can be removed in production)
-logger.info(f"Tests directory: {TESTS_DIR}")
+def get_s3_client():
+    """
+    Get S3 client configured with AWS credentials from settings.
+    
+    Returns:
+        boto3 S3 client
+    
+    Raises:
+        HTTPException: If boto3 is not available or credentials are missing
+    """
+    if not BOTO3_AVAILABLE:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Server configuration error: S3 support not available"
+        )
+    
+    settings = get_settings()
+    
+    # Check if AWS credentials are configured
+    if not settings.AWS_ACCESS_KEY_ID or not settings.AWS_SECRET_ACCESS_KEY:
+        logger.error("AWS credentials not configured. Cannot access S3.")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Server configuration error: AWS credentials not configured"
+        )
+    
+    try:
+        s3_client = boto3.client(
+            's3',
+            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+            region_name=settings.AWS_REGION
+        )
+        return s3_client
+    except Exception as e:
+        logger.error(f"Failed to create S3 client: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Server error: Failed to initialize S3 client"
+        )
+
+
+def get_test_from_s3(test_id: int) -> Dict[str, Any]:
+    """
+    Fetch test JSON data from S3.
+    
+    Args:
+        test_id: The test ID (e.g., 1 for test-1.json)
+    
+    Returns:
+        Test data as dictionary
+    
+    Raises:
+        HTTPException: If test not found or error accessing S3
+    """
+    s3_client = get_s3_client()
+    test_key = f"test-{test_id}.json"
+    
+    try:
+        # Fetch object from S3
+        response = s3_client.get_object(Bucket=TESTS_S3_BUCKET, Key=test_key)
+        test_data = json.loads(response['Body'].read().decode('utf-8'))
+        return test_data
+    except ClientError as e:
+        error_code = e.response.get('Error', {}).get('Code', '')
+        if error_code == 'NoSuchKey' or error_code == '404':
+            logger.warning(f"Test {test_id} not found in S3: {test_key}")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Test {test_id} not found"
+            )
+        else:
+            logger.error(f"Error fetching test {test_id} from S3: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Error reading test data from S3"
+            )
+    except json.JSONDecodeError as e:
+        logger.error(f"Error parsing test JSON from S3 for test {test_id}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error parsing test data"
+        )
+    except Exception as e:
+        logger.error(f"Unexpected error fetching test {test_id} from S3: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error reading test data from S3"
+        )
+
+
+def list_tests_from_s3() -> List[Dict[str, Any]]:
+    """
+    List all test files from S3 bucket.
+    
+    Returns:
+        List of test data dictionaries with id, name, and test_authorization
+    """
+    s3_client = get_s3_client()
+    tests_list = []
+    
+    try:
+        # List all objects with prefix "test-" in the bucket
+        paginator = s3_client.get_paginator('list_objects_v2')
+        pages = paginator.paginate(Bucket=TESTS_S3_BUCKET, Prefix="test-")
+        
+        for page in pages:
+            if 'Contents' not in page:
+                continue
+            
+            for obj in page['Contents']:
+                key = obj['Key']
+                
+                # Only process files matching test-*.json pattern
+                if not key.endswith('.json') or not key.startswith('test-'):
+                    continue
+                
+                # Extract test ID from filename (e.g., "test-1.json" -> 1)
+                filename = Path(key).stem  # "test-1"
+                test_id_str = filename.replace("test-", "")
+                
+                try:
+                    test_id = int(test_id_str)
+                except ValueError:
+                    logger.warning(f"Invalid test filename format in S3: {key}")
+                    continue
+                
+                # Fetch test data to get name and authorization
+                try:
+                    test_data = get_test_from_s3(test_id)
+                    test_name = test_data.get("testName", f"Test {test_id}")
+                    test_authorization = test_data.get("test_authorization", "")
+                    
+                    tests_list.append({
+                        "id": test_id,
+                        "name": test_name,
+                        "test_authorization": test_authorization
+                    })
+                except HTTPException:
+                    # Skip tests that can't be read
+                    logger.warning(f"Skipping test {test_id} due to read error")
+                    continue
+                except Exception as e:
+                    logger.error(f"Error processing test {test_id} from S3: {e}")
+                    continue
+        
+        return tests_list
+    except ClientError as e:
+        error_code = e.response.get('Error', {}).get('Code', '')
+        logger.error(f"Error listing tests from S3: {e}")
+        if error_code == 'NoSuchBucket':
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"S3 bucket '{TESTS_S3_BUCKET}' not found"
+            )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Error listing tests from S3"
+            )
+    except Exception as e:
+        logger.error(f"Unexpected error listing tests from S3: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error listing tests from S3"
+        )
 
 
 def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)) -> dict:
@@ -90,6 +261,114 @@ def check_user_can_access_test(test_authorization: str, user_premium: bool) -> b
     return True
 
 
+def resolve_asset_references(asset_references: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """
+    Resolve asset references by generating presigned URLs for S3 objects.
+    
+    For each assetReference entry:
+    - If type is "s3_object", generates a presigned URL
+    - Other types are passed through as-is (for future extension)
+    
+    Args:
+        asset_references: List of asset reference dictionaries from test JSON
+    
+    Returns:
+        List of resolved asset references with presigned URLs
+    
+    Raises:
+        HTTPException: If any required asset is missing or cannot be resolved
+    """
+    settings = get_settings()
+    resolved_references = []
+    missing_assets = []
+    
+    # Get S3 client
+    s3_client = get_s3_client()
+    
+    # Process each asset reference
+    for asset_ref in asset_references:
+        asset_id = asset_ref.get("id")
+        asset_type = asset_ref.get("type")
+        
+        if not asset_id:
+            logger.warning(f"Skipping asset reference without id: {asset_ref}")
+            continue
+        
+        # Handle url type (constant URLs, no S3 call needed)
+        if asset_type == "url":
+            url = asset_ref.get("url")
+            
+            if not url:
+                logger.warning(f"Skipping url reference without url field: {asset_ref}")
+                missing_assets.append(f"{asset_id} (missing url)")
+                continue
+            
+            # For url type, directly use the URL without any processing
+            resolved_references.append({
+                "id": asset_id,
+                "type": "url",
+                "reference": url
+            })
+            
+            logger.debug(f"Resolved URL reference for {asset_id}: {url}")
+        
+        # Handle s3_object type
+        elif asset_type == "s3_object":
+            bucket = asset_ref.get("bucket")
+            key = asset_ref.get("key")
+            
+            if not bucket or not key:
+                logger.warning(f"Skipping s3_object reference without bucket/key: {asset_ref}")
+                missing_assets.append(f"{asset_id} (missing bucket/key)")
+                continue
+            
+            try:
+                # Check if object exists before generating presigned URL
+                try:
+                    s3_client.head_object(Bucket=bucket, Key=key)
+                except ClientError as e:
+                    error_code = e.response.get('Error', {}).get('Code', '')
+                    if error_code == '404' or error_code == 'NoSuchKey':
+                        logger.error(f"S3 object does not exist: {bucket}/{key} for asset {asset_id}")
+                        missing_assets.append(f"{asset_id} ({bucket}/{key})")
+                    else:
+                        logger.error(f"Error checking S3 object existence for {asset_id}: {e}")
+                        missing_assets.append(f"{asset_id} (error: {error_code})")
+                    continue
+                
+                # Generate presigned URL
+                presigned_url = s3_client.generate_presigned_url(
+                    'get_object',
+                    Params={'Bucket': bucket, 'Key': key},
+                    ExpiresIn=settings.S3_PRESIGNED_URL_EXPIRY_SECONDS
+                )
+                
+                resolved_references.append({
+                    "id": asset_id,
+                    "type": "url",
+                    "reference": presigned_url
+                })
+                
+                logger.debug(f"Generated presigned URL for {asset_id}: {bucket}/{key}")
+            except Exception as e:
+                logger.error(f"Failed to generate presigned URL for {asset_id}: {e}")
+                missing_assets.append(f"{asset_id} (generation failed)")
+                continue
+        else:
+            # For other types, log a warning but continue
+            logger.debug(f"Skipping asset reference type '{asset_type}' for {asset_id} (not yet implemented)")
+    
+    # If any assets are missing, raise an error
+    if missing_assets:
+        logger.error(f"Missing assets detected: {', '.join(missing_assets)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="One or more test assets are missing or unavailable"
+        )
+    
+    return resolved_references
+
+
 @router.get(
     "",
     response_model=List[TestListItem],
@@ -132,32 +411,14 @@ async def list_tests(
     
     tests_list = []
     
-    # Scan tests directory for all test files
-    if not TESTS_DIR.exists():
-        logger.warning(f"Tests directory not found: {TESTS_DIR}")
-        return []
-    
-    # Get all test-*.json files
-    test_files = sorted(TESTS_DIR.glob("test-*.json"))
-    
-    for test_file in test_files:
-        try:
-            # Extract test ID from filename (e.g., "test-1.json" -> 1)
-            filename = test_file.stem  # "test-1"
-            test_id_str = filename.replace("test-", "")
-            
-            try:
-                test_id = int(test_id_str)
-            except ValueError:
-                logger.warning(f"Invalid test filename format: {test_file.name}")
-                continue
-            
-            # Read test file to get name and authorization
-            with open(test_file, 'r', encoding='utf-8') as f:
-                test_data = json.load(f)
-            
-            test_name = test_data.get("testName", f"Test {test_id}")
-            test_authorization = test_data.get("test_authorization", "")
+    # List all tests from S3
+    try:
+        s3_tests = list_tests_from_s3()
+        
+        for test_info in s3_tests:
+            test_id = test_info["id"]
+            test_name = test_info["name"]
+            test_authorization = test_info["test_authorization"]
             
             # Check if user can access this test
             unlocked = check_user_can_access_test(test_authorization, user_premium)
@@ -167,13 +428,13 @@ async def list_tests(
                 name=test_name,
                 unlocked=unlocked
             ))
-            
-        except json.JSONDecodeError as e:
-            logger.error(f"Error parsing test file {test_file}: {e}")
-            continue
-        except Exception as e:
-            logger.error(f"Error reading test file {test_file}: {e}")
-            continue
+    except HTTPException:
+        # Re-raise HTTP exceptions
+        raise
+    except Exception as e:
+        logger.error(f"Error listing tests: {e}")
+        # Return empty list on error to avoid breaking the API
+        return []
     
     # Sort by test ID
     tests_list.sort(key=lambda x: x.id)
@@ -210,28 +471,14 @@ async def get_test(
     Raises:
         HTTPException: If test not found, unauthorized, or access denied
     """
-    # Construct file path
-    test_file = TESTS_DIR / f"test-{test_id}.json"
-    
-    # Check if file exists
-    if not test_file.exists():
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Test {test_id} not found"
-        )
-    
+    # Fetch test data from S3
     try:
-        # Read and parse JSON file
-        with open(test_file, 'r', encoding='utf-8') as f:
-            test_data = json.load(f)
-    except json.JSONDecodeError as e:
-        logger.error(f"Error parsing test file {test_file}: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error reading test data"
-        )
+        test_data = get_test_from_s3(test_id)
+    except HTTPException:
+        # Re-raise HTTP exceptions (404, 500, etc.)
+        raise
     except Exception as e:
-        logger.error(f"Error reading test file {test_file}: {e}")
+        logger.error(f"Unexpected error fetching test {test_id}: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error reading test data"
@@ -261,6 +508,12 @@ async def get_test(
     
     # Remove test_authorization field from response for security
     response_data = {k: v for k, v in test_data.items() if k != "test_authorization"}
+    
+    # Process assetReferences and add assetReferencesResolved
+    asset_references = test_data.get("assetReferences", [])
+    if asset_references:
+        asset_references_resolved = resolve_asset_references(asset_references)
+        response_data["assetReferencesResolved"] = asset_references_resolved
     
     return response_data
 

@@ -1,7 +1,8 @@
 import { useState, useEffect, useImperativeHandle, forwardRef } from 'react'
 import { Box, Typography, Avatar, Divider } from '@mui/material'
+import { resolveAssetReference } from '../../utils/assetResolver'
 
-const BuildTheSentence = forwardRef(function BuildTheSentence({ bundle, question, userAnswers, onAnswerChange, assets, hasSeenIntro = false }, ref) {
+const BuildTheSentence = forwardRef(function BuildTheSentence({ bundle, question, userAnswers, onAnswerChange, assets, assetReferencesResolved = [], hasSeenIntro = false }, ref) {
   // Check if this is the first question in the bundle
   const isFirstQuestion = bundle.questions && bundle.questions[0]?.id === question.id
   const [showIntro, setShowIntro] = useState(() => bundle.questions && bundle.questions[0]?.id === question.id && !hasSeenIntro)
@@ -318,17 +319,21 @@ const BuildTheSentence = forwardRef(function BuildTheSentence({ bundle, question
           flexShrink: 0,
         }}
       >
-        {characterOneImageID && assets && assets[characterOneImageID] && (
-          <Avatar
-            src={assets[characterOneImageID]}
-            alt="Character 1"
-            sx={{
-              width: 70,
-              height: 70,
-              flexShrink: 0,
-            }}
-          />
-        )}
+        {characterOneImageID && (() => {
+          const imageUrl = resolveAssetReference(characterOneImageID, assetReferencesResolved) || 
+                          (assets && assets[characterOneImageID]) // Fallback to old format
+          return imageUrl ? (
+            <Avatar
+              src={imageUrl}
+              alt="Character 1"
+              sx={{
+                width: 70,
+                height: 70,
+                flexShrink: 0,
+              }}
+            />
+          ) : null
+        })()}
         <Typography
           sx={{
             fontSize: '18px',
@@ -352,17 +357,21 @@ const BuildTheSentence = forwardRef(function BuildTheSentence({ bundle, question
           flexShrink: 0,
         }}
       >
-        {characterTwoImageID && assets && assets[characterTwoImageID] && (
-          <Avatar
-            src={assets[characterTwoImageID]}
-            alt="Character 2"
-            sx={{
-              width: 70,
-              height: 70,
-              flexShrink: 0,
-            }}
-          />
-        )}
+        {characterTwoImageID && (() => {
+          const imageUrl = resolveAssetReference(characterTwoImageID, assetReferencesResolved) || 
+                          (assets && assets[characterTwoImageID]) // Fallback to old format
+          return imageUrl ? (
+            <Avatar
+              src={imageUrl}
+              alt="Character 2"
+              sx={{
+                width: 70,
+                height: 70,
+                flexShrink: 0,
+              }}
+            />
+          ) : null
+        })()}
         <Box
           sx={{
             flex: 1,
