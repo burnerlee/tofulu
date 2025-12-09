@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <!-- Homepage - Highest priority for TOEFL keywords -->
+  <url>
+    <loc>https://testino.space/</loc>
+    <lastmod>2024-01-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://testino.space/"/>
+    <xhtml:link rel="alternate" hreflang="en-US" href="https://testino.space/"/>
+    <xhtml:link rel="alternate" hreflang="en-GB" href="https://testino.space/"/>
+    <xhtml:link rel="alternate" hreflang="en-CA" href="https://testino.space/"/>
+    <xhtml:link rel="alternate" hreflang="en-AU" href="https://testino.space/"/>
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://testino.space/"/>
+  </url>
+  
+  <!-- Signup Page -->
+  <url>
+    <loc>https://testino.space/signup</loc>
+    <lastmod>2024-01-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- Login Page (lower priority, but still indexed) -->
+  <url>
+    <loc>https://testino.space/login</loc>
+    <lastmod>2024-01-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+</urlset>

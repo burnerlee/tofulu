@@ -7,15 +7,23 @@ import Features from './components/Features'
 import Login from './components/Login'
 import Signup from './components/Signup'
 import Dashboard from './components/Dashboard'
+import SEO from './components/SEO'
 import './App.css'
 
 function Home() {
   return (
-    <div className="app">
-      <Header />
-      <Hero />
-      <Features />
-    </div>
+    <>
+      <SEO 
+        title="TOEFL Practice Tests & Exam Preparation - Testino | New Format 2026"
+        description="Master the TOEFL exam with our comprehensive practice tests, mock exams, and exam preparation platform. Experience the new TOEFL format (2026) with authentic test simulations, instant AI grading, and detailed performance reports. Start your free TOEFL preparation today!"
+        keywords="TOEFL practice tests, TOEFL exam preparation, TOEFL mock tests, TOEFL new format, TOEFL practice tests new format, TOEFL 2026, TOEFL preparation platform, TOEFL online practice, TOEFL test simulation, TOEFL study guide"
+      />
+      <div className="app">
+        <Header />
+        <Hero />
+        <Features />
+      </div>
+    </>
   )
 }
 
@@ -50,6 +58,11 @@ function App() {
             path="/dashboard" 
             element={
               <ProtectedRoute>
+                <SEO 
+                  title="TOEFL Dashboard - Track Your Progress | Testino"
+                  description="Access your TOEFL practice test results, track your progress, and view detailed performance reports on your personalized dashboard."
+                  noindex={true}
+                />
                 <Dashboard />
               </ProtectedRoute>
             } 
@@ -58,6 +71,11 @@ function App() {
             path="/login" 
             element={
               <PublicRoute>
+                <SEO 
+                  title="Login to TOEFL Practice Platform - Testino"
+                  description="Login to access your TOEFL practice tests, mock exams, and exam preparation resources."
+                  noindex={true}
+                />
                 <Login />
               </PublicRoute>
             } 
@@ -66,6 +84,10 @@ function App() {
             path="/signup" 
             element={
               <PublicRoute>
+                <SEO 
+                  title="Sign Up for Free TOEFL Practice Tests - Testino"
+                  description="Create a free account to start practicing TOEFL tests, access mock exams, and prepare for the new TOEFL format (2026)."
+                />
                 <Signup />
               </PublicRoute>
             } 
