@@ -30,3 +30,6 @@ sqlalchemy>=2.0.31  # Python 3.13 compatible
 python-jose[cryptography]==3.3.0
 # passlib[bcrypt]==1.7.4
 
+# Payment Gateway
+razorpay==2.0.0
+

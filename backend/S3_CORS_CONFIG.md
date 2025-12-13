@@ -127,3 +127,4 @@ If you still see CORS errors:
 - Clear browser cache
 - Wait a few minutes for S3 CORS changes to propagate
 - Check that the origin in the error matches one in your `AllowedOrigins` list
+

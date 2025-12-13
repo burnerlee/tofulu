@@ -86,6 +86,10 @@ SMS_PROVIDER=console
 TWILIO_ACCOUNT_SID=your_account_sid
 TWILIO_AUTH_TOKEN=your_auth_token
 TWILIO_PHONE_NUMBER=your_phone_number
+
+# Razorpay Payment Gateway
+RAZORPAY_KEY_ID=your_razorpay_key_id
+RAZORPAY_KEY_SECRET=your_razorpay_key_secret
 ```
 
 ### 3. Run the Server
