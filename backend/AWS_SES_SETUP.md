@@ -212,7 +212,7 @@ AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
 AWS_REGION=us-east-1
 
 # AWS SES
-AWS_SES_FROM_EMAIL=noreply@testino.com
+AWS_SES_FROM_EMAIL=noreply@testino.space
 ```
 
 ## Next Steps

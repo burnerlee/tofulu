@@ -3,6 +3,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import { Box, Typography, Button, CircularProgress, Alert, Link } from '@mui/material'
 import { VolumeProvider } from './contexts/VolumeContext'
+import { UserProvider } from './contexts/UserContext'
 import WelcomePage from './components/WelcomePage'
 import HardwareCheck from './components/HardwareCheck'
 import VolumeAdjustment from './components/VolumeAdjustment'
@@ -13,6 +14,7 @@ import SectionIntro from './components/SectionIntro'
 import SectionEnd from './components/SectionEnd'
 import ModuleStart from './components/ModuleStart'
 import ModuleEnd from './components/ModuleEnd'
+import { formatResponse, storeResponse, logResponses } from './utils/responseTracker'
 
 // Backend API base URL
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
@@ -67,7 +69,8 @@ function App() {
   const [currentView, setCurrentView] = useState('loading')
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0)
   const [currentModuleIndex, setCurrentModuleIndex] = useState(0)
-  const [userAnswers, setUserAnswers] = useState({})
+  const [userAnswers, setUserAnswers] = useState({}) // Raw answers for component compatibility
+  const [formattedResponses, setFormattedResponses] = useState({}) // Formatted responses for storage
   const [testData, setTestData] = useState(null)
   const [loadingError, setLoadingError] = useState(null)
 
@@ -121,6 +124,23 @@ function App() {
     if (token) {
       localStorage.setItem('auth_token', token)
       console.log('Token stored in platform localStorage')
+      
+      // Extract and store user email from token for UserContext
+      try {
+        const parts = token.split('.')
+        if (parts.length === 3) {
+          const payload = JSON.parse(atob(parts[1]))
+          // Safely access payload properties - don't access .profile or other undefined properties
+          const email = payload?.email || payload?.sub || payload?.['cognito:username'] || null
+          if (email) {
+            // UserContext will pick this up on mount
+            localStorage.setItem('user_email', email)
+          }
+        }
+      } catch (error) {
+        console.error('Error extracting email from token:', error)
+        // Don't throw - allow app to continue
+      }
     }
 
     // Clean up URL by removing both token and test ID after reading them
@@ -164,6 +184,8 @@ function App() {
         // we know we're in the middle of loading a test
         localStorage.setItem('pending_test_load', 'true')
         localStorage.setItem('pending_test_id', trimmedTestId)
+        // Also store as test_id for UserContext
+        localStorage.setItem('test_id', trimmedTestId)
         
         // Fetch test data from backend (will use token from localStorage)
         // fetchTestData will handle loading state and errors
@@ -183,11 +205,14 @@ function App() {
         // Try to resume loading with the stored testId
         const testIdNum = parseInt(storedTestId)
         if (!isNaN(testIdNum) && testIdNum > 0) {
+          // Ensure test_id is set for UserContext
+          localStorage.setItem('test_id', storedTestId)
           fetchTestData(testIdNum)
         } else {
           // Invalid stored testId - clear flags and show error
           localStorage.removeItem('pending_test_load')
           localStorage.removeItem('pending_test_id')
+          localStorage.removeItem('test_id')
           setLoadingError('Invalid test ID. Please start a test from the dashboard.')
         }
       } else {
@@ -284,9 +309,14 @@ function App() {
       setTestData(data)
       setCurrentView('welcome')
       
+      // Store test ID for UserContext (before clearing pending flags)
+      // This ensures UserContext has the test ID available
+      localStorage.setItem('test_id', String(testId))
+      
       // Clear pending flags on successful completion
       localStorage.removeItem('pending_test_load')
-      localStorage.removeItem('pending_test_id')
+      // Keep test_id in localStorage for UserContext to pick up
+      // pending_test_id will be cleared but test_id remains
     } catch (error) {
       // Clear pending flags on exception
       localStorage.removeItem('pending_test_load')
@@ -383,11 +413,23 @@ function App() {
     }
   }
 
-  const updateAnswer = (questionId, answer) => {
+  const updateAnswer = (questionId, answer, questionType = null) => {
+    // Update raw answers for component compatibility
     setUserAnswers(prev => ({
       ...prev,
       [questionId]: answer
     }))
+
+    // Format and store response if question type is provided
+    if (questionType) {
+      const formattedResponse = formatResponse(questionId, answer, questionType)
+      setFormattedResponses(prev => {
+        const updated = storeResponse(prev, questionId, formattedResponse)
+        // Log responses after each update
+        logResponses(updated)
+        return updated
+      })
+    }
   }
 
   // Show loading state
@@ -555,7 +597,8 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <VolumeProvider>
+      <UserProvider>
+        <VolumeProvider>
         {currentView === 'welcome' && (
           <WelcomePage onContinue={handleWelcomeContinue} />
         )}
@@ -697,7 +740,8 @@ function App() {
             </div>
           </div>
         )}
-      </VolumeProvider>
+        </VolumeProvider>
+      </UserProvider>
     </ThemeProvider>
   )
 }

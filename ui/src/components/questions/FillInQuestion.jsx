@@ -34,7 +34,8 @@ function FillInQuestion({ bundle, questions, userAnswers, onAnswerChange, questi
     console.log('Answers array (in order):', answersArray)
     console.log('============================')
     
-    onAnswerChange(questionId, answerToSave)
+    // Pass question type 'fillin' so response tracker knows to format appropriately
+    onAnswerChange(questionId, answerToSave, 'fillin')
     
     // Update current input state for display
     // Always keep currentInputs updated when editing, even if incomplete

@@ -36,7 +36,7 @@ class Settings(BaseSettings):
     
     # Resend Configuration (Recommended - free tier available)
     RESEND_API_KEY: str = os.getenv("RESEND_API_KEY", "")
-    RESEND_FROM_EMAIL: str = os.getenv("RESEND_FROM_EMAIL", "noreply@testino.com")
+    RESEND_FROM_EMAIL: str = os.getenv("RESEND_FROM_EMAIL", "noreply@testino.space")
     
     # AWS SES Configuration
     AWS_SES_FROM_EMAIL: str = os.getenv("AWS_SES_FROM_EMAIL", "")

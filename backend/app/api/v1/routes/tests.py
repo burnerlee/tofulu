@@ -24,6 +24,8 @@ router = APIRouter(prefix="/tests", tags=["tests"])
 
 # S3 bucket name for tests
 TESTS_S3_BUCKET = "testino-tests"
+# S3 bucket name for test responses
+TEST_RESPONSES_S3_BUCKET = "testino-test-responses"
 
 # Check if boto3 is available
 try:
@@ -516,4 +518,86 @@ async def get_test(
         response_data["assetReferencesResolved"] = asset_references_resolved
     
     return response_data
+
+
+class UploadUrlRequest(BaseModel):
+    """Request model for getting presigned upload URL."""
+    user_email: str
+    filename: str
+
+
+@router.post(
+    "/{test_id}/upload-url",
+    status_code=status.HTTP_200_OK,
+    summary="Get presigned URL for uploading test response",
+    description="Generate a presigned URL for uploading test response files (e.g., audio) to S3."
+)
+async def get_upload_url(
+    test_id: int,
+    request: UploadUrlRequest,
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db)
+) -> Dict[str, Any]:
+    """
+    Get a presigned URL for uploading test response files to S3.
+    
+    The file will be uploaded to: user-email/test_id/filename
+    
+    Args:
+        test_id: Test ID
+        request: Upload URL request with user_email and filename
+        current_user: Current authenticated user from JWT token
+        db: Database session
+    
+    Returns:
+        Dictionary with presigned_url, key, and bucket
+    """
+    # Verify user has access to this test (optional - can be removed if not needed)
+    # For now, we'll just verify the user is authenticated
+    
+    # Get S3 client
+    s3_client = get_s3_client()
+    settings = get_settings()
+    
+    # Construct S3 key: user-email/test_id/filename
+    # Sanitize user_email to be filesystem-safe (remove spaces, special chars)
+    safe_user_email = (
+        request.user_email
+        .replace('@', '_at_')
+        .replace('.', '_')
+        .replace(' ', '_')  # Remove spaces
+        .replace('/', '_')  # Remove slashes
+        .replace('\\', '_')  # Remove backslashes
+        .strip()  # Remove leading/trailing whitespace
+    )
+    s3_key = f"{safe_user_email}/{test_id}/{request.filename}"
+    
+    try:
+        # Generate presigned URL for PUT operation (upload)
+        # Note: CORS must be configured on the S3 bucket to allow uploads from browser
+        presigned_url = s3_client.generate_presigned_url(
+            'put_object',
+            Params={
+                'Bucket': TEST_RESPONSES_S3_BUCKET,
+                'Key': s3_key,
+                'ContentType': 'audio/webm',  # Default to audio/webm, can be made configurable
+            },
+            ExpiresIn=settings.S3_PRESIGNED_URL_EXPIRY_SECONDS
+        )
+        
+        logger.debug(f"Generated presigned URL for upload: {s3_key}")
+        
+        logger.info(f"Generated presigned upload URL for test {test_id}, user {request.user_email}, key: {s3_key}")
+        
+        return {
+            "presigned_url": presigned_url,
+            "key": s3_key,
+            "bucket": TEST_RESPONSES_S3_BUCKET,
+        }
+    except Exception as e:
+        logger.error(f"Error generating presigned upload URL: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to generate upload URL"
+        )
 

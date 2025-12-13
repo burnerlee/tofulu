@@ -1,13 +1,16 @@
 import { useState, useEffect, useRef, useImperativeHandle, forwardRef } from 'react'
-import { Box, Typography, Modal, Divider } from '@mui/material'
+import { Box, Typography, Modal, Divider, Button } from '@mui/material'
 import MicIcon from '@mui/icons-material/Mic'
 import MicOffIcon from '@mui/icons-material/MicOff'
 import { useVolume } from '../../contexts/VolumeContext'
 import { resolveAudioReference, resolveAssetReference } from '../../utils/assetResolver'
+import { getPresignedUploadUrl, uploadAudioToS3 } from '../../utils/responseTracker'
+import { useUser } from '../../contexts/UserContext'
 import listenAndRepeatAudio from '../../audios/listenAndRepeat.mp3'
 
-const ListenAndRepeat = forwardRef(function ListenAndRepeat({ bundle, assets, assetReferencesResolved = [], onNextChild, isParent, currentChildIndex, hasSeenIntro = false }, ref) {
+const ListenAndRepeat = forwardRef(function ListenAndRepeat({ bundle, assets, assetReferencesResolved = [], onNextChild, isParent, currentChildIndex, hasSeenIntro = false, onAnswerChange, questionId }, ref) {
   const { getVolumeDecimal } = useVolume()
+  const { userEmail, testId } = useUser()
   // State management
   const [isPlaying, setIsPlaying] = useState(false)
   const [isRecording, setIsRecording] = useState(false)
@@ -16,6 +19,10 @@ const ListenAndRepeat = forwardRef(function ListenAndRepeat({ bundle, assets, as
   const [showTimer, setShowTimer] = useState(false)
   const [parentCompleted, setParentCompleted] = useState(false)
   const [showIntro, setShowIntro] = useState(() => isParent && !hasSeenIntro)
+  const [uploadError, setUploadError] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
+  const [recordedBlob, setRecordedBlob] = useState(null)
+  const [recordedQuestionId, setRecordedQuestionId] = useState(null)
   
   // Refs
   const audioRef = useRef(null)
@@ -26,6 +33,7 @@ const ListenAndRepeat = forwardRef(function ListenAndRepeat({ bundle, assets, as
   const handlersRef = useRef({ handleEnded: null, handleError: null })
   const hasAutoAdvancedRef = useRef(false)
   const introAudioRef = useRef(null)
+  const isRetryInProgressRef = useRef(false)
 
   // Get current display based on isParent
   const currentChild = !isParent && bundle.childQuestions && bundle.childQuestions[currentChildIndex] ? bundle.childQuestions[currentChildIndex] : null
@@ -152,6 +160,137 @@ const ListenAndRepeat = forwardRef(function ListenAndRepeat({ bundle, assets, as
     }
   }
 
+  // Retry upload function
+  const retryUpload = async () => {
+    if (!recordedBlob || !recordedQuestionId || !onAnswerChange || isParent) {
+      console.error('[ListenAndRepeat] Retry called but missing required data', { recordedBlob: !!recordedBlob, recordedQuestionId, hasOnAnswerChange: !!onAnswerChange, isParent })
+      return
+    }
+    
+    console.log('[ListenAndRepeat] Starting retry upload')
+    isRetryInProgressRef.current = true
+    setIsUploading(true)
+    setUploadError(false)
+    
+    try {
+      if (!userEmail || !testId) {
+        throw new Error('Missing user email or test ID for audio upload')
+      }
+      
+      // Generate unique filename
+      const timestamp = Date.now()
+      const randomId = Math.random().toString(36).substring(2, 15)
+      const filename = `audio_${timestamp}_${randomId}.webm`
+      
+      // Get presigned URL
+      const { presignedUrl, key, bucket } = await getPresignedUploadUrl(userEmail, testId, filename)
+      
+      // Upload to S3
+      await uploadAudioToS3(recordedBlob, presignedUrl)
+      
+      // Store response as audio_reference
+      const audioResponse = {
+        type: 'audio_reference',
+        value: {
+          type: 's3_object',
+          bucket: bucket,
+          key: key,
+        },
+      }
+      
+      onAnswerChange(recordedQuestionId, audioResponse, 'listenandrepeat')
+      console.log('Audio uploaded and response stored (retry):', audioResponse)
+      
+      // Upload successful
+      setIsUploading(false)
+      setUploadError(false)
+      
+      // Clear any existing timeout first
+      if (delayTimerRef.current) {
+        clearTimeout(delayTimerRef.current)
+        delayTimerRef.current = null
+      }
+      
+      // Show banner immediately
+      setShowBanner(true)
+      console.log('[ListenAndRepeat] Retry successful - showing banner, will advance in 2 seconds')
+      
+      // After 2 seconds, close banner, clear retry state, and move to next question
+      // Store onNextChild in a variable to ensure it's captured
+      const nextChildHandler = onNextChild
+      delayTimerRef.current = setTimeout(() => {
+        console.log('[ListenAndRepeat] Retry timeout fired - closing banner and advancing')
+        // Clear retry state first
+        setRecordedBlob(null)
+        setRecordedQuestionId(null)
+        isRetryInProgressRef.current = false
+        
+        // Close banner
+        setShowBanner(false)
+        
+        // Move to next question
+        console.log('[ListenAndRepeat] Calling onNextChild after retry success', { hasHandler: !!nextChildHandler })
+        if (nextChildHandler) {
+          try {
+            nextChildHandler()
+          } catch (error) {
+            console.error('[ListenAndRepeat] Error calling onNextChild:', error)
+          }
+        } else {
+          console.error('[ListenAndRepeat] onNextChild is not available!')
+        }
+      }, 2000)
+    } catch (error) {
+      console.error('Error retrying audio upload:', error)
+      setIsUploading(false)
+      setUploadError(true)
+      isRetryInProgressRef.current = false
+    }
+  }
+
+  // Monitor upload status and handle flow after successful upload (initial upload only, not retry)
+  useEffect(() => {
+    // Only proceed if: not parent, upload finished, no error, banner not already shown, retry not in progress
+    // This handles the initial upload flow, retry handles its own flow completely
+    if (!isParent && !isUploading && !uploadError && !showBanner && !isRetryInProgressRef.current) {
+      // Check if we have a recorded blob/question - if so, this is initial upload that just completed
+      // The retry function handles its own flow, so we only handle initial uploads here
+      if (recordedBlob && recordedQuestionId) {
+        // Initial upload completed successfully - clear recorded state and show banner
+        console.log('[ListenAndRepeat] Initial upload successful - showing banner and advancing')
+        
+        // Clear any existing timeout first
+        if (delayTimerRef.current) {
+          clearTimeout(delayTimerRef.current)
+          delayTimerRef.current = null
+        }
+        
+        // Clear recorded state immediately to prevent retry
+        const savedQuestionId = recordedQuestionId
+        setRecordedBlob(null)
+        setRecordedQuestionId(null)
+        
+        // Show banner and move to next
+        // Store onNextChild in a variable to ensure it's captured
+        const nextChildHandler = onNextChild
+        setShowBanner(true)
+        delayTimerRef.current = setTimeout(() => {
+          console.log('[ListenAndRepeat] Initial upload timeout - closing banner and advancing', { hasHandler: !!nextChildHandler })
+          setShowBanner(false)
+          if (nextChildHandler) {
+            try {
+              nextChildHandler()
+            } catch (error) {
+              console.error('[ListenAndRepeat] Error calling onNextChild after initial upload:', error)
+            }
+          } else {
+            console.error('[ListenAndRepeat] onNextChild not available after initial upload!')
+          }
+        }, 2000)
+      }
+    }
+  }, [isUploading, uploadError, isParent, showBanner, onNextChild, recordedBlob, recordedQuestionId])
+
   // Start recording
   const startRecording = async () => {
     try {
@@ -165,13 +304,67 @@ const ListenAndRepeat = forwardRef(function ListenAndRepeat({ bundle, assets, as
         }
       }
       
-      mediaRecorder.onstop = () => {
+      mediaRecorder.onstop = async () => {
         const blob = new Blob(chunks, { type: 'audio/webm' })
-        // Here you would typically send the blob to a server
         console.log('Recording stopped, blob size:', blob.size)
         
         // Stop all tracks
         stream.getTracks().forEach(track => track.stop())
+        
+        // Store blob and question ID for potential retry
+        setRecordedBlob(blob)
+        setRecordedQuestionId(questionId)
+        setIsUploading(true)
+        setUploadError(false)
+        
+        // Upload audio to S3 and store response - MUST complete before moving to next question
+        if (onAnswerChange && questionId && !isParent) {
+          try {
+            if (!userEmail || !testId) {
+              throw new Error('Missing user email or test ID for audio upload')
+            }
+            
+            // Generate unique filename
+            const timestamp = Date.now()
+            const randomId = Math.random().toString(36).substring(2, 15)
+            const filename = `audio_${timestamp}_${randomId}.webm`
+            
+            // Get presigned URL
+            const { presignedUrl, key, bucket } = await getPresignedUploadUrl(userEmail, testId, filename)
+            
+            // Upload to S3
+            await uploadAudioToS3(blob, presignedUrl)
+            
+            // Store response as audio_reference
+            const audioResponse = {
+              type: 'audio_reference',
+              value: {
+                type: 's3_object',
+                bucket: bucket,
+                key: key,
+              },
+            }
+            
+            onAnswerChange(questionId, audioResponse, 'listenandrepeat')
+            console.log('Audio uploaded and response stored:', audioResponse)
+            
+            // Upload successful - clear error state
+            // Don't clear recordedBlob/recordedQuestionId here - let useEffect handle the flow
+            // This ensures consistent behavior between initial upload and retry
+            setIsUploading(false)
+            setUploadError(false)
+            // Keep recordedBlob and recordedQuestionId until useEffect processes them
+          } catch (error) {
+            console.error('Error uploading audio:', error)
+            // Upload failed - show error and prevent moving to next question
+            setIsUploading(false)
+            setUploadError(true)
+            // Don't clear recordedBlob - keep it for retry
+          }
+        } else {
+          // No upload needed (parent question) - allow flow to continue
+          setIsUploading(false)
+        }
       }
       
       mediaRecorderRef.current = mediaRecorder
@@ -198,16 +391,9 @@ const ListenAndRepeat = forwardRef(function ListenAndRepeat({ bundle, assets, as
           setIsRecording(false)
           setShowTimer(false)
           
-          // Show banner
-          setShowBanner(true)
-          
-          // After 2 seconds, move to next question
-          delayTimerRef.current = setTimeout(() => {
-            setShowBanner(false)
-            if (onNextChild) {
-              onNextChild()
-            }
-          }, 2000)
+          // Wait for upload to complete before showing banner or moving to next question
+          // The onstop handler will set isUploading and handle the flow
+          // Don't show banner here - wait for upload to complete
         }
       }, 1000)
     } catch (error) {
@@ -221,29 +407,37 @@ const ListenAndRepeat = forwardRef(function ListenAndRepeat({ bundle, assets, as
   useEffect(() => {
     // Only reset if we're switching TO a child (not when showing parent)
     if (!isParent) {
-      // Reset state when showing a child
-      setShowBanner(false)
-      setShowTimer(false)
-      setIsRecording(false)
-      setTimerSeconds(8)
-      
-      // Clean up any running timers/recording
-      if (delayTimerRef.current) {
-        clearTimeout(delayTimerRef.current)
-        delayTimerRef.current = null
-      }
-      
-      if (timerIntervalRef.current) {
-        clearInterval(timerIntervalRef.current)
-        timerIntervalRef.current = null
-      }
-      
-      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-        mediaRecorderRef.current.stop()
-        mediaRecorderRef.current = null
+      // Don't reset if banner is showing (user might be in the middle of a retry flow)
+      // The banner timeout will handle the transition
+      if (!showBanner && !isRetryInProgressRef.current) {
+        // Reset state when showing a child
+        setShowBanner(false)
+        setShowTimer(false)
+        setIsRecording(false)
+        setTimerSeconds(8)
+        setUploadError(false)
+        setIsUploading(false)
+        setRecordedBlob(null)
+        setRecordedQuestionId(null)
+        
+        // Clean up any running timers/recording
+        if (delayTimerRef.current) {
+          clearTimeout(delayTimerRef.current)
+          delayTimerRef.current = null
+        }
+        
+        if (timerIntervalRef.current) {
+          clearInterval(timerIntervalRef.current)
+          timerIntervalRef.current = null
+        }
+        
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+          mediaRecorderRef.current.stop()
+          mediaRecorderRef.current = null
+        }
       }
     }
-  }, [isParent, currentChildIndex])
+  }, [isParent, currentChildIndex, showBanner])
 
   // Parent phase: show image, wait 2 seconds, play audio, wait 2 seconds, then auto-advance to first child
   // Only start after intro is dismissed
@@ -351,46 +545,57 @@ const ListenAndRepeat = forwardRef(function ListenAndRepeat({ bundle, assets, as
   // Child phase: handle child question sequence
   useEffect(() => {
     if (!isParent && currentChild) {
-      // Reset state when child changes
-      setShowBanner(false)
-      setShowTimer(false)
-      setIsRecording(false)
-      setTimerSeconds(8)
-      
-      // Clean up any existing timers
-      if (delayTimerRef.current) {
-        clearTimeout(delayTimerRef.current)
-        delayTimerRef.current = null
+      // Reset state when child changes (but only if we're actually moving to a new child)
+      // Don't reset if we're in the middle of showing a banner or retrying
+      if (!showBanner && !isRetryInProgressRef.current) {
+        setShowBanner(false)
+        setShowTimer(false)
+        setIsRecording(false)
+        setTimerSeconds(8)
+        setUploadError(false)
+        setIsUploading(false)
+        setRecordedBlob(null)
+        setRecordedQuestionId(null)
+        isRetryInProgressRef.current = false
+        
+        // Clear any pending timers
+        if (delayTimerRef.current) {
+          clearTimeout(delayTimerRef.current)
+          delayTimerRef.current = null
+        }
       }
       
-      // Resolve audioReference for current child
-      const childAudioReference = currentChild?.audioReference
-      const childAudioAsset = childAudioReference 
-        ? resolveAudioReference(childAudioReference, assetReferencesResolved)
-        : (currentChild?.audioAsset) // Fallback to old format
-      
-      // Step 1: Show screen (already shown via imageUrl)
-      // Step 2: After 2 seconds, play audio
-      delayTimerRef.current = setTimeout(() => {
-        if (childAudioAsset) {
-          playAudio(childAudioAsset, () => {
-            // Step 3: After audio completes, wait 2 seconds
-            delayTimerRef.current = setTimeout(() => {
-              // Step 4: Play deep sound
-              playDeepSound()
-              
-              // Step 5: Start recording and timer (after a brief delay for deep sound)
-              setTimeout(() => {
-                startRecording()
-              }, 100)
-            }, 2000)
-          })
-        }
-      }, 2000)
+      // Only start audio playback if we're not in the middle of a retry or showing banner
+      if (!showBanner && !isRetryInProgressRef.current) {
+        // Resolve audioReference for current child
+        const childAudioReference = currentChild?.audioReference
+        const childAudioAsset = childAudioReference 
+          ? resolveAudioReference(childAudioReference, assetReferencesResolved)
+          : (currentChild?.audioAsset) // Fallback to old format
+        
+        // Step 1: Show screen (already shown via imageUrl)
+        // Step 2: After 2 seconds, play audio
+        delayTimerRef.current = setTimeout(() => {
+          if (childAudioAsset) {
+            playAudio(childAudioAsset, () => {
+              // Step 3: After audio completes, wait 2 seconds
+              delayTimerRef.current = setTimeout(() => {
+                // Step 4: Play deep sound
+                playDeepSound()
+                
+                // Step 5: Start recording and timer (after a brief delay for deep sound)
+                setTimeout(() => {
+                  startRecording()
+                }, 100)
+              }, 2000)
+            })
+          }
+        }, 2000)
+      }
     }
     
     return cleanup
-  }, [isParent, currentChild, currentChildIndex, assetReferencesResolved])
+  }, [isParent, currentChild, currentChildIndex, assetReferencesResolved, showBanner])
 
   // Format timer
   const formatTimer = (seconds) => {
@@ -633,9 +838,71 @@ const ListenAndRepeat = forwardRef(function ListenAndRepeat({ bundle, assets, as
         </Box>
       )}
 
-      {/* Response saved banner */}
+      {/* Upload error banner */}
       <Modal
-        open={showBanner}
+        open={uploadError}
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Box
+          sx={{
+            backgroundColor: 'white',
+            borderRadius: '8px',
+            padding: '32px',
+            maxWidth: '500px',
+            textAlign: 'center',
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
+          }}
+        >
+          <Typography
+            sx={{
+              fontSize: '18px',
+              fontWeight: 500,
+              color: '#d32f2f',
+              marginBottom: '16px',
+            }}
+          >
+            Upload Failed
+          </Typography>
+          <Typography
+            sx={{
+              fontSize: '16px',
+              fontWeight: 400,
+              color: '#666666',
+              marginBottom: '24px',
+            }}
+          >
+            Something went wrong while uploading your response. Please try again.
+          </Typography>
+          <Button
+            variant="contained"
+            onClick={retryUpload}
+            disabled={isUploading}
+            sx={{
+              backgroundColor: '#008080',
+              color: 'white',
+              textTransform: 'none',
+              padding: '10px 24px',
+              '&:hover': {
+                backgroundColor: '#006666',
+              },
+              '&.Mui-disabled': {
+                backgroundColor: '#008080',
+                opacity: 0.6,
+              },
+            }}
+          >
+            {isUploading ? 'Uploading...' : 'Try Again'}
+          </Button>
+        </Box>
+      </Modal>
+
+      {/* Response saved banner - only show if not uploading and no error */}
+      <Modal
+        open={showBanner && !uploadError && !isUploading}
         sx={{
           display: 'flex',
           alignItems: 'center',
@@ -677,10 +944,45 @@ const ListenAndRepeat = forwardRef(function ListenAndRepeat({ bundle, assets, as
               fontSize: '16px',
               fontWeight: 400,
               color: '#666666',
+              marginBottom: '24px',
             }}
           >
-            Please wait. We are currently saving your response.
+            Your response has been saved.
           </Typography>
+          <Button
+            variant="contained"
+            onClick={() => {
+              console.log('[ListenAndRepeat] Manual close button clicked')
+              // Clear any existing timeout
+              if (delayTimerRef.current) {
+                clearTimeout(delayTimerRef.current)
+                delayTimerRef.current = null
+              }
+              // Clear retry state
+              setRecordedBlob(null)
+              setRecordedQuestionId(null)
+              isRetryInProgressRef.current = false
+              // Close banner
+              setShowBanner(false)
+              // Move to next question
+              if (onNextChild) {
+                onNextChild()
+              } else {
+                console.error('[ListenAndRepeat] onNextChild not available on manual close!')
+              }
+            }}
+            sx={{
+              backgroundColor: '#008080',
+              color: 'white',
+              textTransform: 'none',
+              padding: '10px 24px',
+              '&:hover': {
+                backgroundColor: '#006666',
+              },
+            }}
+          >
+            Continue
+          </Button>
         </Box>
       </Modal>
     </Box>

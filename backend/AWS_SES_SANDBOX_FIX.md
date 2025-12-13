@@ -34,7 +34,7 @@ This allows you to send emails to **any** email address without verification.
 4. Click **"Request production access"** button
 5. Fill out the form:
    - **Mail Type**: Transactional
-   - **Website URL**: Your website URL (e.g., https://testino.com)
+   - **Website URL**: Your website URL (e.g., https://testino.space)
    - **Use case description**: 
      ```
      We are sending OTP (One-Time Password) verification codes for user authentication 

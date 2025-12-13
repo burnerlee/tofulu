@@ -281,32 +281,7 @@ function ListenPassageQuestion({ bundle, question, assets, assetReferencesResolv
   if (showIntro && isFirstQuestion) {
     return (
       <Box>
-        {/* Refresh button at top */}
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'flex-end',
-            marginBottom: '16px',
-          }}
-        >
-          <Button
-            onClick={handleRefresh}
-            variant="outlined"
-            size="small"
-            startIcon={<RefreshIcon />}
-            sx={{
-              borderColor: '#008080',
-              color: '#008080',
-              textTransform: 'none',
-              '&:hover': {
-                borderColor: '#006666',
-                backgroundColor: '#f5f5f5',
-              },
-            }}
-          >
-            Refresh
-          </Button>
-        </Box>
+        {/* Refresh button removed for debugging */}
 
         {/* Heading */}
         <Box
@@ -358,32 +333,7 @@ function ListenPassageQuestion({ bundle, question, assets, assetReferencesResolv
   // Question screen - show question, options, and character image
   return (
     <Box>
-      {/* Refresh button at top - show on all questions */}
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'flex-end',
-          marginBottom: '16px',
-        }}
-      >
-        <Button
-          onClick={handleRefresh}
-          variant="outlined"
-          size="small"
-          startIcon={<RefreshIcon />}
-          sx={{
-            borderColor: '#008080',
-            color: '#008080',
-            textTransform: 'none',
-            '&:hover': {
-              borderColor: '#006666',
-              backgroundColor: '#f5f5f5',
-            },
-          }}
-        >
-          Refresh
-        </Button>
-      </Box>
+      {/* Refresh button removed for debugging */}
 
       {/* Content Layout */}
       <Box

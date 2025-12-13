@@ -83,7 +83,7 @@ const BuildTheSentence = forwardRef(function BuildTheSentence({ bundle, question
     // Place the dragged phrase in the new blank
     newAnswer[blankIndex] = draggedPhrase
 
-    onAnswerChange(question.id, newAnswer)
+    onAnswerChange(question.id, newAnswer, 'buildthesentence')
     setDraggedPhrase(null)
   }
 
@@ -96,7 +96,7 @@ const BuildTheSentence = forwardRef(function BuildTheSentence({ bundle, question
     const blankIndex = newAnswer.indexOf(draggedPhrase)
     if (blankIndex !== -1) {
       newAnswer[blankIndex] = null
-      onAnswerChange(question.id, newAnswer)
+      onAnswerChange(question.id, newAnswer, 'buildthesentence')
     }
     setDraggedPhrase(null)
   }
@@ -107,7 +107,7 @@ const BuildTheSentence = forwardRef(function BuildTheSentence({ bundle, question
     if (emptyBlankIndex !== -1) {
       const newAnswer = [...currentAnswer]
       newAnswer[emptyBlankIndex] = phraseIndex
-      onAnswerChange(question.id, newAnswer)
+      onAnswerChange(question.id, newAnswer, 'buildthesentence')
     }
   }
 
@@ -116,7 +116,7 @@ const BuildTheSentence = forwardRef(function BuildTheSentence({ bundle, question
     if (currentAnswer[blankIndex] !== null) {
       const newAnswer = [...currentAnswer]
       newAnswer[blankIndex] = null
-      onAnswerChange(question.id, newAnswer)
+      onAnswerChange(question.id, newAnswer, 'buildthesentence')
     }
   }
 

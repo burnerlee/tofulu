@@ -554,8 +554,20 @@ function ModuleView({ module, assets, assetReferencesResolved = [], userAnswers,
     }
   }
 
-  const handleAnswerChange = (questionId, answer) => {
-    onAnswerChange(questionId, answer)
+  const handleAnswerChange = (questionId, answer, questionType = null) => {
+    // Determine question type if not provided
+    let type = questionType
+    
+    if (!type) {
+      // Try to get type from current question item
+      if (currentQuestionItem) {
+        type = currentQuestionItem.bundleType
+      } else if (currentBundle) {
+        type = currentBundle.type
+      }
+    }
+    
+    onAnswerChange(questionId, answer, type)
   }
 
   const handleVolumeClick = () => {
@@ -1029,6 +1041,8 @@ function ModuleView({ module, assets, assetReferencesResolved = [], userAnswers,
                   setShowEnd(true)
                 }
               }}
+              onAnswerChange={handleAnswerChange}
+              questionId={!isParent && currentBundle.childQuestions?.[childIndex]?.id}
             />
           )
         })()}
@@ -1065,6 +1079,8 @@ function ModuleView({ module, assets, assetReferencesResolved = [], userAnswers,
                   setShowEnd(true)
                 }
               }}
+              onAnswerChange={handleAnswerChange}
+              questionId={!isParent && currentBundle.InterviewerQuestions?.[childIndex]?.id}
             />
           )
         })()}
