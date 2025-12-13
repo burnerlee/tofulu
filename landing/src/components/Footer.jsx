@@ -30,7 +30,7 @@ function Footer() {
             rel="noopener noreferrer"
             className="footer-link"
           >
-            Cancellation and Refund Policy
+            Cancellation and Refunds
           </a>
           <span className="footer-separator">·</span>
           <a 

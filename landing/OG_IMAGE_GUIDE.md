@@ -218,3 +218,4 @@ If you need a designer to create this:
 ---
 
 **Remember**: This image represents your brand on social media. Make it professional, clear, and aligned with your brand identity!
+

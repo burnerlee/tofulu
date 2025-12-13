@@ -9,10 +9,12 @@ function Header() {
   const isAuthPage = location.pathname === '/login' || location.pathname === '/signup'
   const isLandingPage = location.pathname === '/'
   const isDashboard = location.pathname === '/dashboard'
+  const isPlansPage = location.pathname === '/plans'
+  const isAuthenticatedPage = isDashboard || isPlansPage
   
   return (
-    <header className={`header ${isDashboard ? 'header-dashboard' : ''}`}>
-      <div className={`header-container ${isDashboard ? 'header-container-dashboard' : ''}`}>
+    <header className={`header ${isAuthenticatedPage ? 'header-dashboard' : ''}`}>
+      <div className={`header-container ${isAuthenticatedPage ? 'header-container-dashboard' : ''}`}>
         <Link to="/" className="logo">
           <div className="logo-icon">
             <div className="crescent"></div>
@@ -26,9 +28,14 @@ function Header() {
               Free Practice Test
               <span className="arrow">→</span>
             </Link>
-          ) : isDashboard && isAuthenticated ? (
-            // Dashboard shows sign out when authenticated
+          ) : isAuthenticatedPage && isAuthenticated ? (
+            // Dashboard and Plans pages show Unlock Tests button and sign out when authenticated
             <>
+              {!isPlansPage && (
+                <Link to="/plans" className="unlock-button">
+                  Unlock Tests
+                </Link>
+              )}
               {user?.name && (
                 <span className="user-name">Hi, {user.name}</span>
               )}

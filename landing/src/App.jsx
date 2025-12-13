@@ -8,6 +8,7 @@ import Footer from './components/Footer'
 import Login from './components/Login'
 import Signup from './components/Signup'
 import Dashboard from './components/Dashboard'
+import Plans from './components/Plans'
 import SEO from './components/SEO'
 import './App.css'
 
@@ -92,6 +93,19 @@ function App() {
                 />
                 <Signup />
               </PublicRoute>
+            } 
+          />
+          <Route 
+            path="/plans" 
+            element={
+              <ProtectedRoute>
+                <SEO 
+                  title="Premium Plans - Unlock All Tests | Testino"
+                  description="Upgrade to Premium and unlock all TOEFL practice tests with lifetime access and AI-graded responses."
+                  noindex={true}
+                />
+                <Plans />
+              </ProtectedRoute>
             } 
           />
         </Routes>

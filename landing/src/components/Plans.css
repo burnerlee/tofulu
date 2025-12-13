@@ -1,0 +1,250 @@
+.plans-page {
+  min-height: 100vh;
+  background-color: #F5F5F5;
+  padding: 40px 24px;
+  padding-top: 120px; /* Account for fixed header (80px height + 40px padding) */
+  animation: fadeIn 0.6s ease-out;
+}
+
+.plans-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.plans-header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.plans-title {
+  font-family: 'Oswald', sans-serif;
+  font-size: 32px;
+  font-weight: 600;
+  color: #000000;
+  margin: 0 0 16px 0;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  animation: fadeInUp 0.8s ease-out;
+}
+
+.plans-subtitle {
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  color: #333333;
+  margin: 0;
+  animation: fadeInUp 0.8s ease-out 0.2s both;
+}
+
+.plan-card {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 48px 40px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  position: relative;
+  animation: fadeInUp 0.8s ease-out 0.4s both;
+  border: 2px solid #086A6F;
+}
+
+.plan-badge {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #086A6F;
+  color: #ffffff;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 16px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.plan-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.plan-name {
+  font-family: 'Oswald', sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  color: #000000;
+  margin: 0 0 24px 0;
+  letter-spacing: -0.02em;
+}
+
+.plan-price {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.price-amount {
+  font-family: 'Oswald', sans-serif;
+  font-size: 40px;
+  font-weight: 600;
+  color: #086A6F;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.price-period {
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  color: #666666;
+}
+
+.plan-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 32px 0;
+  width: 100%;
+  max-width: 400px;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  color: #000000;
+  text-align: left;
+}
+
+.feature-icon {
+  width: 24px;
+  height: 24px;
+  background-color: #086A6F;
+  color: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.pay-button {
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #ffffff;
+  background-color: #086A6F;
+  border: none;
+  border-radius: 8px;
+  padding: 16px 48px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  max-width: 300px;
+  box-shadow: 0 2px 8px rgba(8, 106, 111, 0.2);
+}
+
+.pay-button:hover:not(:disabled) {
+  background-color: #065559;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(8, 106, 111, 0.3);
+}
+
+.pay-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.pay-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.error-message {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #dc3545;
+  margin-bottom: 16px;
+  text-align: center;
+  padding: 12px;
+  background-color: rgba(220, 53, 69, 0.1);
+  border-radius: 8px;
+  width: 100%;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .plans-page {
+    padding: 24px 16px;
+    padding-top: 104px; /* Account for fixed header (64px height + 40px padding) */
+  }
+
+  .plans-title {
+    font-size: 28px;
+  }
+
+  .plans-subtitle {
+    font-size: 16px;
+  }
+
+  .plan-card {
+    padding: 32px 24px;
+  }
+
+  .plan-name {
+    font-size: 22px;
+  }
+
+  .price-amount {
+    font-size: 36px;
+  }
+
+  .plan-features {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .plans-title {
+    font-size: 24px;
+  }
+
+  .plans-subtitle {
+    font-size: 14px;
+  }
+
+  .plan-name {
+    font-size: 20px;
+  }
+
+  .price-amount {
+    font-size: 32px;
+  }
+}
+

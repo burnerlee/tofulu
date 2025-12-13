@@ -141,6 +141,26 @@
   background-color: rgba(8, 106, 111, 0.05);
 }
 
+.unlock-button {
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  color: #ffffff;
+  background-color: #086A6F;
+  text-decoration: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  letter-spacing: 0.01em;
+  box-shadow: 0 2px 8px rgba(8, 106, 111, 0.2);
+}
+
+.unlock-button:hover {
+  background-color: #065559;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(8, 106, 111, 0.3);
+}
+
 .arrow {
   font-size: 18px;
 }
