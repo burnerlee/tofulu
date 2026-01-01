@@ -44,14 +44,13 @@ function Features() {
     <section className="features">
       <div className="features-container">
         <h2 className="features-title">Why Choose Testino?</h2>
-        <p className="features-subtitle">Everything you need to assess better</p>
         <div className="features-grid">
           <div 
             ref={(el) => (cardRefs.current[0] = el)}
             className={`feature-card ${visibleCards.includes(0) ? 'fade-in-visible' : 'fade-in-hidden'}`}
           >
             <div className="feature-icon">
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M12 1L3 5V11C3 16.55 6.84 21.74 12 23C17.16 21.74 21 16.55 21 11V5L12 1Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 <path d="M9 12L11 14L15 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
@@ -67,7 +66,7 @@ function Features() {
             className={`feature-card ${visibleCards.includes(1) ? 'fade-in-visible' : 'fade-in-hidden'}`}
           >
             <div className="feature-icon">
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M18 20V10M12 20V4M6 20V14" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </div>
@@ -82,7 +81,7 @@ function Features() {
             className={`feature-card ${visibleCards.includes(2) ? 'fade-in-visible' : 'fade-in-hidden'}`}
           >
             <div className="feature-icon">
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </div>
