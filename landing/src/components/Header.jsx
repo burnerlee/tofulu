@@ -1,6 +1,7 @@
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import openBookIcon from '../assets/open-book-4.png'
 import './Header.css'
 
 function Header() {
@@ -17,15 +18,15 @@ function Header() {
       <div className={`header-container ${isAuthenticatedPage ? 'header-container-dashboard' : ''}`}>
         <Link to="/" className="logo">
           <div className="logo-icon">
-            <div className="crescent"></div>
+            <img src={openBookIcon} alt="Testino logo" className="logo-icon-img" />
           </div>
           <span className="logo-text">Testino</span>
         </Link>
         <div className="header-actions">
           {isLandingPage ? (
-            // Landing page always shows "Free Practice Test"
+            // Landing page always shows "Sign Up"
             <Link to="/login" className="download-link">
-              Free Practice Test
+              Sign Up
               <span className="arrow">→</span>
             </Link>
           ) : isAuthenticatedPage && isAuthenticated ? (
@@ -44,9 +45,9 @@ function Header() {
               </button>
             </>
           ) : !isAuthPage && !isAuthenticated ? (
-            // Other pages show "Free Practice Test" when not authenticated
+            // Other pages show "Sign Up" when not authenticated
             <Link to="/login" className="download-link">
-              Free Practice Test
+              Sign Up
               <span className="arrow">→</span>
             </Link>
           ) : null}

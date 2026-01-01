@@ -1,38 +1,52 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import './Hero.css'
-import laptopImage from '../assets/laptop.png'
+import tick from '../assets/correct.png'
+
 
 function Hero() {
   const navigate = useNavigate()
 
   return (
     <section className="hero">
-      <div className="hero-container">
+      <div className="hero-content">
+        {/* <div className="hero-badge">
+          <span className="badge-icon">✨</span>
+          <span className="badge-text">The #1 Rated TOEFL Prep in 2026</span>
+        </div> */}
         <h1 className="hero-headline">
-          Your Ultimate TOEFL<br />
-          Preparation Platform
+          MASTER YOUR<br />
+          FUTURE.
         </h1>
         <div className="hero-subheadline-container">
           <p className="hero-subheadline-line1">
-            Practice TOEFL tests and master the
+            Your Ultimate TOEFL Preparation Platform
           </p>
           <p className="hero-subheadline-line2">
-            New TOEFL Format - Jan 2026
+            for the <span className="hero-subheadline-highlight">New Jan 2026 Format</span>
           </p>
         </div>
         <button 
-          className="cta-button"
+          className="hero-button hero-button-primary"
           onClick={() => navigate('/login')}
         >
           Start preparation for free
           <span className="button-arrow">→</span>
         </button>
-        <img 
-          src={laptopImage} 
-          alt="TOEFL test interface on laptop" 
-          className="laptop-image"
-        />
+        <div className="hero-features">
+        <div className="hero-feature">
+          <img src={tick} alt="tick-icon" className="tick-icon-img" />
+          <p className='feature'>REAL TEST SIMULATION</p>
+        </div>
+        <div className="hero-feature">
+        <img src={tick} alt="tick-icon" className="tick-icon-img" />
+        <p className='feature'>INSTANT SCORING</p>
+        </div> 
+        <div className="hero-feature">
+        <img src={tick} alt="tick-icon" className="tick-icon-img" />
+        <p className='feature'>5 MOCK TESTS</p>
+        </div> 
+        </div>
       </div>
     </section>
   )

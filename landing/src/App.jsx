@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext'
 import Header from './components/Header'
 import Hero from './components/Hero'
 import Features from './components/Features'
+import CTA from './components/CTA'
 import Footer from './components/Footer'
 import Login from './components/Login'
 import Signup from './components/Signup'
@@ -24,6 +25,7 @@ function Home() {
         <Header />
         <Hero />
         <Features />
+        {/* <CTA /> */}
         <Footer />
       </div>
     </>
