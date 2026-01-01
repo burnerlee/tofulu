@@ -1,6 +1,15 @@
 .features {
   padding: 120px 24px;
-  background: linear-gradient(135deg, #086A6F 0%, #20B2AA 50%, #40e0d0 100%);
+  background: linear-gradient(135deg,
+  #064E52 0%,
+  #147A75 50%,
+  #2A9B95 100%);
+  /* background: linear-gradient(
+  135deg,
+  hsl(185, 80%, 25%) 0%,
+  hsl(175, 60%, 35%) 50%,
+  hsl(170, 50%, 45%) 100%
+); */
   position: relative;
   overflow: hidden;
 }
