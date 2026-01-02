@@ -55,9 +55,9 @@ function Features() {
                 <path d="M9 12L11 14L15 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </div>
-            <h3 className="feature-heading">Secure Environment</h3>
+            <h3 className="feature-heading">Authentic TOEFL Experience</h3>
             <p className="feature-description">
-              Advanced browser lockdown and proctoring capabilities ensure assessment integrity.
+              Experience the closest simulation to the actual TOEFL test with our carefully designed platform that mirrors the real exam environment.
             </p>
           </div>
 
@@ -70,9 +70,9 @@ function Features() {
                 <path d="M18 20V10M12 20V4M6 20V14" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </div>
-            <h3 className="feature-heading">Instant Analytics</h3>
+            <h3 className="feature-heading">Affordable for Everyone</h3>
             <p className="feature-description">
-              Real-time grading and detailed performance insights for students and classes.
+              Start with our free sample tests and choose from flexible, budget-friendly plans designed to make TOEFL preparation accessible to all.
             </p>
           </div>
 
@@ -85,9 +85,9 @@ function Features() {
                 <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </div>
-            <h3 className="feature-heading">Lightning Fast</h3>
+            <h3 className="feature-heading">Instant Grading & Reports</h3>
             <p className="feature-description">
-              Optimized for speed and reliability, ensuring smooth testing even with low bandwidth.
+              Get immediate feedback with AI-powered grading and detailed evaluation reports to track your progress and identify areas for improvement.
             </p>
           </div>
         </div>
