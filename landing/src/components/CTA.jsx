@@ -7,15 +7,15 @@ function CTA() {
       <div className="cta-container">
         <h2 className="cta-title">Ready to elevate your assessments?</h2>
         <p className="cta-subtitle">
-          Join thousands of educators and organizations delivering secure, intelligent exams today.
+          Join thousands of test takers to start intelligent exam prep today.
         </p>
         <div className="cta-buttons">
-          <button className="cta-button primary">
+          <button className="cta-button primary" onClick={() => navigate('/login')}>
             Get Started for Free
           </button>
-          <button className="cta-button secondary">
+          {/* <button className="cta-button secondary">
             Contact Sales
-          </button>
+          </button> */}
         </div>
       </div>
     </section>

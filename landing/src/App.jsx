@@ -25,7 +25,7 @@ function Home() {
         <Header />
         <Hero />
         <Features />
-        {/* <CTA /> */}
+        <CTA />
         <Footer />
       </div>
     </>
