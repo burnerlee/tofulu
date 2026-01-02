@@ -10,8 +10,8 @@ function CTA() {
           Join thousands of test takers to start intelligent exam prep today.
         </p>
         <div className="cta-buttons">
-          <button className="cta-button primary" onClick={() => navigate('/login')}>
-            Get Started for Free
+          <button className="hero-button hero-button-primary" onClick={() => navigate('/login')}>
+            Get Started for Free ->
           </button>
           {/* <button className="cta-button secondary">
             Contact Sales
