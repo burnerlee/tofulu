@@ -89,55 +89,124 @@ function Dashboard() {
       <Header />
       <div className="dashboard-container">
         <div className="dashboard-header">
-          <div className="greeting-emoji">🤝</div>
-          <h1 className="greeting-text">
-            Welcome back, {userName}!
-          </h1>
+          <div className="header-left">
+            <h1 className="dashboard-title">Student Dashboard</h1>
+            <p className="dashboard-subtitle">Continue your Jan 2026 preparation track.</p>
+          </div>
+          <div className="header-right">
+            <div className="free-plan">
+              <span className="plan-text">Free Plan</span>
+              <span className="tests-count">1/5 Tests Available</span>
+              <button className="upgrade-button">Upgrade</button>
+            </div>
+          </div>
         </div>
 
         <div className="tests-section">
-          <h2 className="tests-title">Available Tests</h2>
-          {loading ? (
-            <div style={{ textAlign: 'center', padding: '40px' }}>
-              <p>Loading tests...</p>
-            </div>
-          ) : error ? (
-            <div style={{ textAlign: 'center', padding: '40px' }}>
-              <p style={{ color: '#dc3545' }}>{error}</p>
-            </div>
-          ) : tests.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '40px' }}>
-              <p>No tests available.</p>
-            </div>
-          ) : (
-            <div className="tests-grid">
-              {tests.map((test) => (
-              <div
-                key={test.id}
-                className={`test-card ${test.unlocked ? 'unlocked' : 'locked'}`}
-              >
-                <div className="test-card-content">
-                  <div className="test-icon">
-                    {test.unlocked ? '📝' : '🔒'}
+          <div className="tests-grid">
+            <div className="test-card available">
+              <div className="test-card-content">
+                <div className="test-header">
+                  <div className="test-icon diagnostic-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" fill="#086A6F"/>
+                      <path d="M14 2v6h6" fill="#065559"/>
+                      <path d="M16 13H8" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                      <path d="M16 17H8" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                      <path d="M10 9H8" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
                   </div>
-                  <h3 className="test-name">{test.name}</h3>
-                  {test.unlocked ? (
-                    <button 
-                      className="test-button start-button"
-                      onClick={() => handleStartTest(test.id)}
-                    >
-                      Start Test
-                    </button>
-                  ) : (
-                    <div className="test-locked-message">
-                      Locked
-                    </div>
-                  )}
+                  <div className="test-info">
+                    <h3 className="test-name">TOEFL Diagnostic Mock #01</h3>
+                    <span className="test-status available">Available</span>
+                  </div>
                 </div>
+                <div className="test-details">
+                  <span className="detail-item">28 Questions</span>
+                  <span className="detail-item">35 mins</span>
+                  <span className="detail-item">Last Score: 26/30</span>
+                </div>
+                <button className="test-button start-button" onClick={() => handleStartTest(1)}>
+                  Start Test
+                </button>
               </div>
-              ))}
             </div>
-          )}
+
+            <div className="test-card premium">
+              <div className="test-card-content">
+                <div className="test-header">
+                  <div className="test-icon locked-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                      <rect x="5" y="11" width="14" height="10" rx="2" fill="#999999"/>
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="#999999" stroke-width="2" stroke-linecap="round"/>
+                      <circle cx="12" cy="16" r="1" fill="white"/>
+                    </svg>
+                  </div>
+                  <div className="test-info">
+                    <h3 className="test-name">Full-Length Simulation #02</h3>
+                    <span className="test-status premium">Premium</span>
+                  </div>
+                </div>
+                <div className="test-details">
+                  <span className="detail-item">54 Questions</span>
+                  <span className="detail-item">120 mins</span>
+                </div>
+                <button className="test-button unlock-button">
+                  Unlock Now
+                </button>
+              </div>
+            </div>
+
+            <div className="test-card premium">
+              <div className="test-card-content">
+                <div className="test-header">
+                  <div className="test-icon locked-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                      <rect x="5" y="11" width="14" height="10" rx="2" fill="#999999"/>
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="#999999" stroke-width="2" stroke-linecap="round"/>
+                      <circle cx="12" cy="16" r="1" fill="white"/>
+                    </svg>
+                  </div>
+                  <div className="test-info">
+                    <h3 className="test-name">Speaking & Writing Intensive</h3>
+                    <span className="test-status premium">Premium</span>
+                  </div>
+                </div>
+                <div className="test-details">
+                  <span className="detail-item">12 Questions</span>
+                  <span className="detail-item">45 mins</span>
+                </div>
+                <button className="test-button unlock-button">
+                  Unlock Now
+                </button>
+              </div>
+            </div>
+
+            <div className="test-card premium">
+              <div className="test-card-content">
+                <div className="test-header">
+                  <div className="test-icon locked-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                      <rect x="5" y="11" width="14" height="10" rx="2" fill="#999999"/>
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="#999999" stroke-width="2" stroke-linecap="round"/>
+                      <circle cx="12" cy="16" r="1" fill="white"/>
+                    </svg>
+                  </div>
+                  <div className="test-info">
+                    <h3 className="test-name">Reading Section Mastery</h3>
+                    <span className="test-status premium">Premium</span>
+                  </div>
+                </div>
+                <div className="test-details">
+                  <span className="detail-item">30 Questions</span>
+                  <span className="detail-item">60 mins</span>
+                </div>
+                <button className="test-button unlock-button">
+                  Unlock Now
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
